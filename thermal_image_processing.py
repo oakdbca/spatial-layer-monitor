@@ -236,21 +236,21 @@ def create_boundaries_and_centroids(flight_timestamp, kml_boundaries_file, bboxe
 def send_notification_emails(flight_name, success, msg, districts=[]):
     postmark = PostmarkClient(server_token=config.get('general', 'server_token'))
     recipients = config.get('emails', 'always_email')
-    if success or not success:
-        for district in districts:
-            recipients += ', ' + config.get('emails', district)
+    if not success:
         postmark.emails.send(
             From='patrick.maslen@dbca.wa.gov.au',
             To=recipients,
-            Subject='Thermal Image testing',
-            HtmlBody='Automated email advising that a new dataset,' + flight_name + ', has arrived and been processed on kens-therm-001.<br>' + msg
+            Subject='New Thermal Image data FAILED to complete processing',
+            HtmlBody='Automated email advising that a new dataset,' + flight_name + ', has arrived but has not been successfully processed on kens-therm-001.<br>' + msg
         )
     else:
+        for district in districts:
+            recipients += ', ' + config.get('emails', district)
         postmark.emails.send(
                 From='patrick.maslen@dbca.wa.gov.au',
                 To=recipients,
-                Subject='Thermal Image testing FAILED',
-                HtmlBody='Automated email advising that a new dataset,' + flight_name + ', has arrived but has not been successfully processed on kens-therm-001.<br>' + msg)
+                Subject='New Thermal Image data available',
+                HtmlBody='Automated email advising that a new dataset,' + flight_name + ', has arrived and has been successfully processed; it can be viewed in SSS.<br>' + msg)
 
 def publish_image_on_geoserver(flight_name, image_name=None):
     flight_timestamp = flight_name.replace("FireFlight_", "")
