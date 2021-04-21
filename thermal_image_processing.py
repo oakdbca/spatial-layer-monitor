@@ -31,6 +31,8 @@ blob_service_client = BlobServiceClient.from_connection_string(azure_conn_string
 districts_dataset_name = config.get('general', 'districts_dataset_name')
 districts_gpkg = os.path.join(os.path.dirname(__file__),districts_dataset_name)
 districts_layer_name = config.get('general', 'districts_layer_name')
+user = config.get('geoserver', 'user')
+gs_pwd = config.get('geoserver', 'gs_pwd')
 
 class Footprint:
     def __init__(self):
@@ -253,8 +255,6 @@ def send_notification_emails(flight_name, success, msg, districts=[]):
 def publish_image_on_geoserver(flight_name, image_name=None):
     flight_timestamp = flight_name.replace("FireFlight_", "")
     headers = {'Content-type': 'application/xml'}
-    user = 'admin'
-    gs_pwd = 'BrilliantA5sembly'
     file_url_base = 'file:///rclone-mounts/thermalimaging-flightmosaics/'
     gs_url_base = 'https://hotspots.dbca.wa.gov.au/geoserver/rest/workspaces/hotspots/coveragestores/'
     if image_name is None:
