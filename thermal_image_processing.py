@@ -126,23 +126,19 @@ def push_to_azure(img_file, blob_name):
     except exception as e:
         print(str(e))
 
-def create_mosaic_footprint_as_line(flight_timestamp, image, engine, footprint):
-    # Get coords of diagonal corners of output raster
-    working_image = gdal.Open(image)
-    ulx, uly, lrx, lry = get_corners(working_image)
-    working_image = None
+def create_mosaic_footprint_as_line(files, raw_img_folder, flight_timestamp, image, engine, footprint):
+    bboxes = create_img_bounding_boxes(files, raw_img_folder)
+    minx, miny, maxx, maxy = bboxes.geometry.total_bounds
     # Create linestring
-    points = [(ulx, uly), (lrx, uly), (lrx, lry), (ulx, lry), (ulx, uly)]
-    #footprint_line = LineString(points)
+    points = [(minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)]
     footprint.as_line = LineString(points)
     footprint.as_poly = Polygon(points)
-    #geom = gpd.geoseries.GeoSeries([footprint_line])
     line_geom = gpd.geoseries.GeoSeries([footprint.as_line])
     poly_geom = gpd.geoseries.GeoSeries([footprint.as_poly])
     data_dictionary = {"flight_datetime": [flight_timestamp]}
-    footprint_line_layer = gpd.geodataframe.GeoDataFrame(data_dictionary, crs="EPSG:28350", geometry=line_geom).to_crs("EPSG:4326")
+    footprint_line_layer = gpd.geodataframe.GeoDataFrame(data_dictionary, crs="EPSG:4326", geometry=line_geom)
     footprint_line_layer.to_postgis("hotspot_flight_footprints", engine, if_exists="append")
-    footprint_poly_layer = gpd.geodataframe.GeoDataFrame(data_dictionary, crs="EPSG:28350", geometry=poly_geom).to_crs("EPSG:4326")
+    footprint_poly_layer = gpd.geodataframe.GeoDataFrame(data_dictionary, crs="EPSG:4326", geometry=poly_geom)
     footprint_poly_layer.to_file(output_geopackage, layer='footprint', driver="GPKG")
 
 def get_footprint_districts(footprint):
@@ -318,86 +314,88 @@ else:
     all_images_with_hotspots = []
     try:
         merge(files)
-        msg += "<br>Mosaic produced on kens-therm-001 OK"
+        msg += "\nMosaic produced on kens-therm-001 OK"
         print("Mosaic produced on kens-therm-001 OK")
     except:
         success = False
-        msg += "<br>Mosaic production on kens-therm-001 failed"
+        msg += "\nMosaic production on kens-therm-001 failed"
         print("Mosaic production on kens-therm-001 failed")
     time.sleep(60)
     mosaic_pushed_to_azure = False
     try:
         push_to_azure(mosaic_image, flight_name + ".tif")
-        msg += "<br>Mosaic pushed to Azure OK"
+        msg += "\nMosaic pushed to Azure OK"
         print("Mosaic pushed to Azure OK")
         mosaic_pushed_to_azure = True
     except:
-        msg += "<br>Mosaic push to Azure failed"
+        msg += "\nMosaic push to Azure failed"
         print("Mosaic push to Azure failed")
     try:
-        create_mosaic_footprint_as_line(flight_timestamp, mosaic_image, engine, footprint)
+        create_mosaic_footprint_as_line(files, raw_img_folder, flight_timestamp, mosaic_image, engine, footprint)
         # NB this populates footprint.as_line and footprint.as_poly
-        msg += "<br>Footprint produced and pushed to PostGIS OK"
+        msg += "\nFootprint produced and pushed to PostGIS OK"
         print("Footprint produced and pushed to PostGIS OK")
     except:
         success = False
-        msg += "<br>Footprint production or push to PostGIS failed"
+        msg += "\nFootprint production or push to PostGIS failed"
         print("Footprint production or push to PostGIS failed")
     try:
         get_footprint_districts(footprint)
-        msg += "<br>Footprint lies in district(s) " + str(footprint.districts)
+        msg += "\nFootprint lies in district(s) " + str(footprint.districts)
         print("Footprint lies in district(s) " + str(footprint.districts))
     except:
         success = False
-        msg += "<br>Footprint district(s) not found"
+        msg += "\nFootprint district(s) not found"
         print("Footprint district(s) not found")
     try:
         bboxes = create_img_bounding_boxes(files, raw_img_folder)
-        msg += "<br>Bounding box creation for images OK"
+        msg += "\nBounding box creation for images OK"
         print("Bounding box creation for images OK")
     except:
         success = False
-        msg += "<br>Bounding box creation for images failed"
+        msg += "\nBounding box creation for images failed"
         print("Bounding box creation for images failed")
     try:
         all_images_with_hotspots = create_boundaries_and_centroids(flight_timestamp, kml_boundaries_file, bboxes, engine) # e.g. = ['000039.png', '000040.png', ... , '000106.png']
         if all_images_with_hotspots == []:
-            msg += "<br>NO HOTSPOTS FOUND!!!"
+            msg += "\nNO HOTSPOTS FOUND!!!"
             print("NO HOTSPOTS FOUND!!!")
             #success = False
         else:
-            msg += "<br>Boundaries and centroids creation and push to PostGIS OK"
+            msg += "\nBoundaries and centroids creation and push to PostGIS OK"
             print("Boundaries and centroids creation  and push to PostGIS OK")
     except:
         success = False
-        msg += "<br>Boundaries and centroids creation or push to PostGIS failed"
+        msg += "\nBoundaries and centroids creation or push to PostGIS failed"
         print("Boundaries and centroids creation or push to PostGIS failed")
     try:
         if len(all_images_with_hotspots) > 0:
             for img in all_images_with_hotspots:
                 full_path = os.path.join(raw_img_folder, img)
                 translate_png2tif(full_path, img)
-            msg += "<br>Production of tif images OK"
+            msg += "\nProduction of tif images OK"
             print("Production of tif images OK")
     except:
-        msg += "<br>Production of tif images failed"
+        msg += "\nProduction of tif images failed"
         print("Production of tif images failed")
     # A cron job runs in Rancher every 5 min to update the file storage for geoserver; also allow extra time for processing - 10 min; later reduced to 1min
     time.sleep(60)
     try:
         if mosaic_pushed_to_azure:
             publish_image_on_geoserver(flight_name)
-            msg += "<br>Mosaic published on geoserver OK"
+            msg += "\nMosaic published on geoserver OK"
             print("Mosaic published on geoserver OK")
         else:
-            msg += "<br>Mosaic could not be published on geoserver!!!"
+            msg += "\nMosaic could not be published on geoserver!!!"
             print("Mosaic could not be published on geoserver!!!")
         for img in all_images_with_hotspots:
             img = img.replace(".png", ".tif")
             publish_image_on_geoserver(flight_name, img)
     except:
         success = False
-        msg += "<br>Mosaic publishing on geoserver failed"
+        msg += "\nMosaic publishing on geoserver failed"
         print("Mosaic publishing on geoserver failed")
+    with open('/home/f2quser/Processed_Thermal_Imagery/logs/' + flight_name + '.txt', 'w+') as fh:
+        fh.write(msg)
     #print(msg)
-    send_notification_emails(flight_name, success, msg, footprint.districts)
+    #send_notification_emails(flight_name, success, msg, footprint.districts)
