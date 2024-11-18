@@ -51,7 +51,6 @@ RUN virtualenv /app/venv
 ENV PATH=/app/venv/bin:$PATH
 RUN git config --global --add safe.directory /app
 
-# RUN /bin/bash -c "source /app/venv/local/bin/activate"
 COPY requirements.txt ./
 COPY python-cron ./
 RUN whoami
@@ -61,9 +60,6 @@ RUN /app/venv/bin/pip3 install --no-cache-dir -r requirements.txt
 FROM python_libs_thermal_processing
 COPY timezone /etc/timezone
 
-COPY gunicorn.ini ./
-
-RUN touch /app/.env
 COPY .git ./.git
 
 EXPOSE 8080
