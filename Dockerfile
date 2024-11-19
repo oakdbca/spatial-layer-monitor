@@ -13,6 +13,7 @@ RUN mv /etc/apt/sourcesau.list /etc/apt/sources.list
 
 # Key for Build purposes only
 ENV FIELD_ENCRYPTION_KEY="Mv12YKHFm4WgTXMqvnoUUMZPpxx1ZnlFkfGzwactcdM="
+
 # Key for Build purposes only
 RUN apt-get clean
 RUN apt-get update
