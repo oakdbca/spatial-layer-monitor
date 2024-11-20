@@ -23,12 +23,9 @@ RUN apt-get install --no-install-recommends -y libpq-dev patch virtualenv
 RUN apt-get install --no-install-recommends -y postgresql-client mtr 
 RUN apt-get install --no-install-recommends -y sqlite3 vim postgresql-client ssh htop iputils-ping python3-azure
 RUN apt-get install --no-install-recommends -y gdal-bin python3-gdal
-RUN apt-get install --no-install-recommends -y libgdal-dev build-essential
-
+RUN apt-get install --no-install-recommends -y libgdal-dev build-essential p7zip-full
 
 RUN ln -s /usr/bin/python3 /usr/bin/python 
-#RUN ln -s /usr/bin/pip3 /usr/bin/pip
-# RUN pip install --upgrade pip
 
 RUN groupadd -g 5000 oim 
 RUN useradd -g 5000 -u 5000 oim -s /bin/bash -d /app
