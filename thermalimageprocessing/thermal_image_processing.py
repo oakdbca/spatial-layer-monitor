@@ -5,10 +5,11 @@ import subprocess
 import sys
 import requests
 import time
-import gdal
+#import gdal
+from osgeo import gdal
 import gdal_merge
 import gdal_edit
-import ogr
+from osgeo import ogr
 import geopandas as gpd
 import pandas as pd
 from shapely.wkt import loads
@@ -17,22 +18,24 @@ from sqlalchemy import create_engine
 from postmarker.core import PostmarkClient
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
+# print(os.environ.get('KEY_THAT_MIGHT_EXIST', default_value))
+# os.environ.get('') #
 # Settings, could go to config file if neeeded
-config = ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__),'config.cfg'))
+#config = ConfigParser()
+#config.read(os.path.join(os.path.dirname(__file__),'config.cfg'))
 input_image_file_ext = ".png"
 output_image_file_ext = ".tif"
-source_folder = "/mnt/data/dmp"
-dest_folder = "/home/f2quser/Processed_Thermal_Imagery"
-postgis_table = config.get('general', 'postgis_table')
-azure_conn_string = config.get('general', 'azure_conn_string') 
-container_name = config.get('general', 'container_name')
+source_folder = "/data/data/projects/thermal-image-processing/thermalimageprocessing/thermal_data"
+dest_folder = "/data/data/projects/thermal-image-processing/thermalimageprocessing/thermal_data_processing"
+postgis_table = os.environ.get('general_postgis_table') #config.get('general', 'postgis_table')
+azure_conn_string = os.environ.get('general_azure_conn_string') # config.get('general', 'azure_conn_string') 
+container_name = os.environ.get('general_container_name') # config.get('general', 'container_name')
 blob_service_client = BlobServiceClient.from_connection_string(azure_conn_string)
-districts_dataset_name = config.get('general', 'districts_dataset_name')
+districts_dataset_name = os.environ.get('general_districts_dataset_name') # config.get('general', 'districts_dataset_name')
 districts_gpkg = os.path.join(os.path.dirname(__file__),districts_dataset_name)
-districts_layer_name = config.get('general', 'districts_layer_name')
-user = config.get('geoserver', 'user')
-gs_pwd = config.get('geoserver', 'gs_pwd')
+districts_layer_name = os.environ.get('general_districts_layer_name') #config.get('general', 'districts_layer_name')
+user = os.environ.get('geoserver_user') #config.get('geoserver', 'user')
+gs_pwd = os.environ.get('geoserver_password') #config.get('geoserver', 'gs_pwd')
 
 class Footprint:
     def __init__(self):
@@ -123,7 +126,7 @@ def push_to_azure(img_file, blob_name):
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
         with open(img_file, "rb") as data:
             blob_client.upload_blob(data)
-    except exception as e:
+    except Exception as e:
         print(str(e))
 
 def create_mosaic_footprint_as_line(files, raw_img_folder, flight_timestamp, image, engine, footprint):
@@ -231,7 +234,7 @@ def create_boundaries_and_centroids(flight_timestamp, kml_boundaries_file, bboxe
 
 def send_notification_emails(flight_name, success, msg, districts=[]):
     postmark = PostmarkClient(server_token=config.get('general', 'server_token'))
-    recipients = config.get('emails', 'always_email')
+    recipients = os.environ.get('email_always_email') # config.get('emails', 'always_email')
     if not success:
         postmark.emails.send(
             From='patrick.maslen@dbca.wa.gov.au',
@@ -241,9 +244,9 @@ def send_notification_emails(flight_name, success, msg, districts=[]):
         )
     else:
         for district in districts:
-            recipients += ', ' + config.get('emails', district)
+            recipients += ', ' + os.environ.get('email_'+district) #config.get('emails', district)
         postmark.emails.send(
-                From='patrick.maslen@dbca.wa.gov.au',
+                From=os.environ.get('email_from_address','no-reply@dbca.wa.gov.au'),
                 To=recipients,
                 Subject='New Thermal Image data available',
                 HtmlBody='Automated email advising that a new dataset,' + flight_name + ', has arrived and has been successfully processed; it can be viewed in SSS.<br>' + msg)
@@ -251,8 +254,8 @@ def send_notification_emails(flight_name, success, msg, districts=[]):
 def publish_image_on_geoserver(flight_name, image_name=None):
     flight_timestamp = flight_name.replace("FireFlight_", "")
     headers = {'Content-type': 'application/xml'}
-    file_url_base = 'file:///rclone-mounts/thermalimaging-flightmosaics/'
-    gs_url_base = 'https://hotspots.dbca.wa.gov.au/geoserver/rest/workspaces/hotspots/coveragestores/'
+    file_url_base = os.environ.get('general_file_url_base', 'file:///rclone-mounts/thermalimaging-flightmosaics/')
+    gs_url_base = os.environ.get('general_gs_url_base','https://hotspots.dbca.wa.gov.au/geoserver/rest/workspaces/hotspots/coveragestores/')
     if image_name is None:
         gs_layer_url = gs_url_base + flight_name + '.tif/coverages'
     else:
@@ -395,7 +398,7 @@ else:
         success = False
         msg += "\nMosaic publishing on geoserver failed"
         print("Mosaic publishing on geoserver failed")
-    with open('/home/f2quser/Processed_Thermal_Imagery/logs/' + flight_name + '.txt', 'w+') as fh:
+    with open('./logs/' + flight_name + '.txt', 'w+') as fh:
         fh.write(msg)
     #print(msg)
     #send_notification_emails(flight_name, success, msg, footprint.districts)

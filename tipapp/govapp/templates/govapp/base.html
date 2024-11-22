@@ -1,0 +1,101 @@
+{% extends "webtemplate_dbca/base_b5_auth_session.html" %}
+
+{% block extra_css %}
+    <link rel="stylesheet" type="text/css" href="/static/common/css/select2.css?ver={{ GIT_COMMIT_HASH }}"/>
+    <link rel="stylesheet" type="text/css" href="/static/common/css/select2-bootstrap-5-theme.css?ver={{ GIT_COMMIT_HASH }}"/>
+    <link rel="stylesheet" type="text/css" href="/static/common/css/front_custom.css?ver={{ GIT_COMMIT_HASH }}"/>
+    <link rel="icon" type="image/png" href="/static/common/img/favicon.ico">
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/tip.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<script src="/static/common/js/select2.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<!-- any extra javascript goes here -->
+{% endblock %}
+
+{% block header_top_menu %}
+{% endblock %}
+
+{% block top_menu %}
+{% endblock %}
+
+{% block menubottom %}
+<!-- value -->
+{%endblock %}
+
+{% block menu_items_left_brand %}
+{%endblock %}
+
+{% block menu_dropdown %}
+    {% if request.user.is_superuser or is_django_admin %}
+        {% include 'webtemplate_dbca/includes/staff_menu.html' %}
+    {% endif %}
+    {% block menu_extra_dropdown_staff_top %}
+        {% if request.user.is_superuser or is_admin %}
+            {% include 'webtemplate_dbca/includes/staff_menu_extras.html' %}
+        {% endif %}
+    {% endblock %}
+
+    <li><a class="dropdown-item" href="{% url 'logout' %}?next=/">Logout</a></li>
+{% endblock %}
+
+
+{% block menu_items2_right %}
+{% if request.user.is_authenticated %}
+
+{% else %}
+<a href="/ssologin" class="btn btn-primary btn-sm">Login</a>
+{% endif %}
+{% endblock %}
+
+
+{% block menu_spacer %}
+<BR>
+{% endblock %}
+
+{% block extra_style %}
+<style>
+    .footer {
+        background-color: lightgrey
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <!-- Messages  -->
+    {% if messages %}
+    <div class="row">
+        <div class="col">
+            {% for message in messages %}
+            <div class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}">
+                {{ message|safe }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col">
+            {% block page_content_inner %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+
+{% endblock %}
+
+{% block page_footer %}
+<footer class="footer mt-auto py-3">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <small class="float-right">&copy; Department of Biodiversity, Conservation and Attractions2</small>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock page_footer %}

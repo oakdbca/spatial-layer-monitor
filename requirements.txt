@@ -1,5 +1,47 @@
+# backend processing script requirements.
 geopandas==1.0.1
 SQLAlchemy==2.0.36
 postmarker==1.0
 azure-storage-blob==12.24.0
 GDAL==3.8.4
+pyinotify-elephant-fork==0.0.1
+psycopg2==2.9.10
+
+# Django Application Requirements
+django~=5.0.7
+django-extensions>=3.2.3
+djangorestframework>=3.14.0
+djangorestframework-datatables>=0.7.2
+python-decouple>=3.6
+dj-database-url>=1.0.0
+psycopg2>=^2.9.4
+gunicorn==23.0.0
+whitenoise==5.3.0
+git+https://github.com/dbca-wa/dbca-utils.git#egg=dbca-utils
+git+https://github.com/dbca-wa/webtemplate2.git#egg=webtemplate_dbca
+git+https://github.com/dbca-wa/wagov_utils.git#egg=wagov_utils
+drf-spectacular>=0.24.2
+django-filter>=22.1
+python-dateutil>=2.8.2
+django-reversion>=5.0.4
+django-reversion-rest-framework>=1.1.2
+# django-cron>=0.6.0
+git+https://github.com/jorenham/django-cron.git#egg=django-cron
+py7zr>=0.20.2
+rarfile>=4.0
+httpx>=0.23.2
+lxml>=4.9.2
+owslib==0.29.2
+numpy==2.0.1
+git+https://github.com/dbca-wa/appmonitor_client.git#egg=appmonitor_client
+cryptography>=42.0.7
+pillow==10.3.0
+pyjwt==2.8.0
+urllib3>=2.1.0
+wheel==0.42.0
+oauthlib==3.2.2
+sentry-sdk==1.44
+requests>=2.32.3
+anyio>=4.4.0
+GDAL==3.8.4
+setuptools==72.0.0
