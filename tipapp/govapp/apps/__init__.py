@@ -1,0 +1,1 @@
+"""Kaartdijin Boodja Django Applications."""
