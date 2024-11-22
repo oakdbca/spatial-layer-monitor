@@ -1,0 +1,15 @@
+{
+	"name": "Thermal Imaging Processing Development",
+	"image": "dbcawa/docker_app_dev:thermal_image_processing_dev_latest",
+	"remoteUser": "container",
+	"workspaceFolder": "/data/data/projects/thermal-image-processing",
+	"mounts": ["type=bind,source=/data/,target=/data/",
+	           "type=bind,source=/data/data/containerhome/,target=/home/container/"
+	          ],	
+	"appPort": [ "7029:8080","9196:9196","9197:9197","9198:9198","9199:9199","9200:9200"],
+	"runArgs": ["--env-file","${localEnv:HOME}/vscode-env/thermal-image-processing.env",
+		   "--hostname","thermal-image-processing-dev"
+		   ],
+	"forwardPorts": [9196,9197,9198,9199,9200],
+	"initializeCommand" : ""
+}
