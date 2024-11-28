@@ -329,3 +329,8 @@ if not RUNNING_DEVSERVER and SENTRY_DSN and EMAIL_INSTANCE:
         environment=EMAIL_INSTANCE.lower(),
         release=APPLICATION_VERSION,
     )
+
+PENDING_IMPORT_PATH=decouple.config("PENDING_IMPORT_PATH", default="./pending_imports/")
+if not os.path.exists(PENDING_IMPORT_PATH):
+    os.makedirs(PENDING_IMPORT_PATH)
+DATA_STORAGE=decouple.config("DATA_STORAGE", default="./data_storage/")

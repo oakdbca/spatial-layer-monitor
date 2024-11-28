@@ -1,0 +1,29 @@
+{% block content %}
+
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="/static/common/css/tipapp.css?ver={{ GIT_COMMIT_HASH }}"
+/>
+
+<div class="file-upload-component">
+  <input
+    type="file"
+    class="file"
+    multiple
+    style="display: none"
+    accept=".7z, .pdf"
+  />
+  <input type="hidden" id="csrfmiddlewaretoken" name="csrfmiddlewaretoken" value="{{ csrf_token  }}"/>
+
+  <div class="alert alert-info" role="alert">
+    <i class="bi bi-cloud-arrow-up-fill"></i>
+    Drop file(s) into this window or click the button below to browse
+  </div>
+  <button class="btn btn-primary" id="upload-file-btn">
+    Select File(s) [.7z]
+  </button>
+  <div id="progressBars"></div>
+</div>
+
+{% endblock %}

@@ -23,6 +23,7 @@ from django import urls
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
+
 # Local
 from govapp import views
 # from govapp.apps.accounts.views import FileDeleteView, FileDownloadView, FileListView
@@ -42,8 +43,16 @@ def trigger_error(request):
 urlpatterns = [
     # Home Page
     urls.path("", views.HomePage.as_view(), name="home"),
+    urls.path("files-dashboard", views.ThermalFilesDashboardView.as_view(), name="files-dashboard"),
+    urls.path("upload-files", views.ThermalFilesUploadView.as_view(), name="upload-files"),
+    
+    urls.path("api/upload-files/thermal_files/", views.api_upload_thermal_files),
+    urls.path("api/upload-files/list_pending_imports/", views.list_pending_imports),
+    urls.path("api/upload-files/api_delete_thermal_file/", views.api_delete_thermal_file),
     # Django Administration
     urls.path("admin/", admin.site.urls),
+
+
 ]
 
 # DBCA Template URLs

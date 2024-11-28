@@ -1,0 +1,45 @@
+{% extends 'govapp/base.html' %} 
+
+{% block content %}
+
+<div class="container" id="droppable-area">
+  <h3>Upload Zipped Layer</h3>
+  <hr class="mt-5 mb-3" />
+
+  <div class="file-upload">{% include './upload-file-component.html' %}</div>
+  
+
+    <div class="pending-imports my-4">
+
+        <div class="card  rounded-3 shadow-sm">
+            <div class="card-header py-3">
+            <h4 class="my-0 fw-bold">Pending Imports</h4>
+            </div>
+            <div class="card-body">
+            
+                <div id="pending-imports">
+                    <table id="example" class="table" style="width:100%">
+                        <thead class='table-dark'>
+                        <tr>
+                              <th>Path</th>
+                              <th>Uploaded</th>                              
+                        </tr>
+                        </thead>
+                        <tbody id='publish-tbody'>
+                        <tr>
+                              <td colspan="8" class='text-center'>Loading...</td>
+                        </tr>
+                        </tbody>
+                  </table>  
+                </div>
+              
+            
+            </div>
+        </div>
+    </div>
+    <script>
+        tip_app.init_pending_imports()
+    </script>
+  
+</div>
+{% endblock %}
