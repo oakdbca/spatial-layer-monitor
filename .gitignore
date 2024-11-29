@@ -6,5 +6,7 @@ thermal_image_processing.py.save
 thermal_image_processing_bkp.py
 venv
 tipapp/cache
-tipapp/pending_imports
-
+pending_imports/
+data_storage/
+tipapp/logs/kaartdijin_boodja.log
+tipapp/logs/kaartdijin_boodja_sql.log
