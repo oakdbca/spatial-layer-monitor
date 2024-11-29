@@ -1,29 +1,23 @@
-var tip_app = {
+var tip_upload = {
   dt: null,
   var: {
     page: 1,
     page_size: 10,
     data: [],
     upload_files_url: "/api/upload-files/",
-    catalogue_data_url: "/api/catalogue/entries/",
   },
 
-  init_dashboard: function () {
-    let table = new DataTable("#dt-thermal-files");
-  },
-
-  init_pending_imports: function () {
-    const _ = tip_app;
+  init: function () {
+    const _ = tip_upload;
     _.var.page = 1;
     _.var.page_size = 10;
 
-    // tip_app.get_pending_imports();
     _.dt = $("#pending-imports table").DataTable({
       serverSide: true,
       ajax: function (data, callback, settings) {
         _.get_pending_imports_data(
           {
-            page: data && data.start ? data.start / data.length : 1,
+            page: data && data.start ? data.start / data.length + 1 : 1,
             page_size: data?.length,
             search: data?.search?.value,
             draw: data?.draw,
@@ -42,25 +36,20 @@ var tip_app = {
       headerCallback: function (thead, data, start, end, display) {
         $(thead).addClass("table-dark");
       },
-      columns: [{ data: "path" }, { data: "last_modified" }],
+      columns: [{ data: "path" }, { data: "created_at" }],
     });
-
-    $("#fileInput").change(function () {
-      var files = $("#fileInput")[0].files;
-      tip_app.uploadFiles(files);
-    });
-    // Select by drag-and-drop
 
     const mainSelector = ".file-upload";
     const container = $(mainSelector);
     container
       .find('input[type="file"]')
-      .on("change", (e) => tip_app.handleFileInputChange(e));
+      .on("change", (e) => tip_upload.handleFileInputChange(e));
 
     container.find(".btn.btn-primary").on("click", function () {
       document.querySelector(`${mainSelector} input[type="file"]`).click();
     });
 
+    // Drag-and-drop events
     $(mainSelector).on("dragover", function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -88,7 +77,7 @@ var tip_app = {
       $(this).removeClass("dragover");
       const ev = e.originalEvent;
       if (ev.dataTransfer.items) {
-        tip_app.uploadFiles(
+        tip_upload.uploadFiles(
           [...ev.dataTransfer.items]
             .map((item, i) => {
               if (item.kind === "file") {
@@ -98,29 +87,20 @@ var tip_app = {
             .filter((f) => f)
         );
       } else {
-        tip_app.uploadFiles(ev.dataTransfer.files);
+        tip_upload.uploadFiles(ev.dataTransfer.files);
       }
-    });
-    $("#cancel_upload_catalogue_btn").on("click", function (event) {
-      tip_app.cancelUpload();
-    }),
-      $("#submit_upload_catalogue_btn").on("click", function (event) {
-        tip_app.submitUploadCatalogue();
-      });
-    $("#modal_upload_catalogue").on("hidden.bs.modal", function (e) {
-      tip_app.modalClosed();
     });
   },
   handleFileInputChange: (e) => {
     const files = $(e.target).prop("files");
     if (!files || files.length === 0) return;
-    tip_app.uploadFiles(files);
+    tip_upload.uploadFiles(files);
   },
 
   get_pending_imports_data: function (params, cb_success, cb_error) {
     const defaultParams = {
-      page: params?.page ?? tip_app.var.page,
-      page_size: params?.page_size ?? tip_app.var.page_size,
+      page: params?.page ?? tip_upload.var.page,
+      page_size: params?.page_size ?? tip_upload.var.page_size,
     };
     const _params = {
       name__icontains: $("#file-name").val(),
@@ -130,7 +110,8 @@ var tip_app = {
     );
 
     $.ajax({
-      url: tip_app.var.upload_files_url + "list_pending_imports/?" + params_str,
+      url:
+        tip_upload.var.upload_files_url + "list_pending_imports/?" + params_str,
       method: "GET",
       dataType: "json",
       contentType: "application/json",
@@ -207,11 +188,6 @@ var tip_app = {
       '<svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12L12 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 12L4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
       { class: "delete-icon", "data-newFileName": newFileName }
     );
-    /* var deleteIcon2 = $(
-      '<span class="delete-icon" data-newFileName="' +
-        newFileName +
-        '"><svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12L12 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 12L4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>'
-    ); */
 
     fileNameColumn.append(fileNameElement);
     progressBarColumn.append(progressBar);
@@ -235,26 +211,21 @@ var tip_app = {
     // Make an AJAX request to delete the file
     var csrf_token = $("#csrfmiddlewaretoken").val();
     var xhr = $.ajax({
-      url: tip_app.var.upload_files_url + "api_delete_thermal_file/", // Change the URL to your delete file endpoint
+      url: tip_upload.var.upload_files_url + "api_delete_thermal_file/", // Change the URL to your delete file endpoint
       type: "POST",
       headers: { "X-CSRFToken": csrf_token }, // Include CSRF token in headers
       data: { newFileName: fileName },
       success: function (data) {},
       error: function (xhr, status, error) {
         console.error("Error deleting file:", error);
-
       },
     });
   },
 
-  submitUploadCatalogue: function () {
-    var progressBarContainer = $("#progressBars");
-    progressBarContainer.empty();
-  },
   cancelUpload: function () {
     $(".cross-sign").each(function () {
       var newFilename = $(this).data("newfilename");
-      tip_app.deleteFile(newFilename);
+      tip_upload.deleteFile(newFilename);
     });
     var progressBarContainer = $("#progressBars");
     progressBarContainer.empty();
@@ -263,32 +234,30 @@ var tip_app = {
   // Function for uploading files
   uploadFiles: function (files) {
     let xhrList = [];
-    let completed = 0
+    let completed = 0;
     var csrf_token = $("#csrfmiddlewaretoken").val();
 
     for (var i = 0; i < files.length; i++) {
       var fileName = files[i].name;
-      var newFileName = tip_app.addDateTimeToFilename(fileName);
+      var newFileName = tip_upload.addDateTimeToFilename(fileName);
 
       // Generate progressbar per file
       var { progressBar, progressBarContainer, deleteIcon } =
-        tip_app.createProgressBar(fileName, newFileName);
+        tip_upload.createProgressBar(fileName, newFileName);
       $("#progressBars").append(progressBarContainer);
 
       (function (index, progressBar, progressBarContainer) {
         var formData = new FormData();
         formData.append("file", files[index]);
         formData.append("newFileName", newFileName);
-       
+
         deleteIcon.on("click", function () {
-          
           if (xhrList[index] && xhrList[index].readyState !== 4) {
             xhrList[index].abort();
             return;
-          }
-          else {
+          } else {
             var newFileName = $(this).attr("data-new-file-name");
-            tip_app.deleteFile(newFileName);
+            tip_upload.deleteFile(newFileName);
           }
           progressBarContainer.fadeOut("slow", function () {
             $(this).remove();
@@ -297,7 +266,7 @@ var tip_app = {
 
         // Upload
         var xhr = $.ajax({
-          url: tip_app.var.upload_files_url + "thermal_files/",
+          url: tip_upload.var.upload_files_url + "thermal_files/",
           type: "POST",
           headers: { "X-CSRFToken": csrf_token },
           data: formData,
@@ -344,15 +313,14 @@ var tip_app = {
             return xhr;
           },
           success: function (response) {
-            console.log("File uploaded successfully:", response);            
-            if(++completed === xhrList.length) {
-              tip_app?.dt.draw(['page'])
+            console.log("File uploaded successfully:", response);
+            if (++completed === xhrList.length) {
+              tip_upload?.dt.draw(["page"]);
             }
-            
           },
           error: function (xhr, status, error) {
-            if(++completed === xhrList.length) {
-              tip_app?.dt.draw(['page'])
+            if (++completed === xhrList.length) {
+              tip_upload?.dt.draw(["page"]);
             }
             if (!xhr.responseText) return;
             var errorResponse = JSON.parse(xhr.responseText);
@@ -371,5 +339,4 @@ var tip_app = {
       })(i, progressBar, progressBarContainer);
     }
   },
-
 };

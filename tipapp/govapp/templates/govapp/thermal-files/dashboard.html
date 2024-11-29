@@ -1,9 +1,39 @@
-{% extends 'govapp/base.html' %}
+{% extends 'govapp/base.html' %} 
 
 {% block content %}
-<div class='container'>
-    <h2>Dashboard</h2>
 
+<div class="container" id="droppable-area">
+    <input type="hidden" id="route_path" name="route_path" value="{{ route_path }}"/>
+    <div class="tip_dashboard my-1">
+
+        <div class="card  rounded-3 shadow-sm">
+            <div class="card-header py-3">
+            <h4 class="my-0 fw-bold">Thermal Files</h4>
+            </div>
+            <div class="card-body">
+                <nav aria-label="breadcrumb">
+                    <ol id="dashboard-breadcrumb" class="breadcrumb">
+                      <!-- <li class="breadcrumb-item active" aria-current="page">{{root}}</li> -->
+                    </ol>
+                  </nav>
+            
+                <div id="tip_dashboard">
+                    <table id="example" class="table" style="width:100%">
+                        <tbody id='publish-tbody'>
+                        <tr>
+                              <td colspan="8" class='text-center'>Loading...</td>
+                        </tr>
+                        </tbody>
+                  </table>  
+                </div>
+              
+            
+            </div>
+        </div>
+    </div>
+    <script>
+        tip_dashboard.init()
+    </script>
+  
 </div>
-
 {% endblock %}

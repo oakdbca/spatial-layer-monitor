@@ -9,11 +9,12 @@ from django import shortcuts
 from django.http import JsonResponse
 from django.views.generic import base
 from django.contrib import auth
+from django.core.paginator import Paginator
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from .tasks import get_files_list, get_file_record
+from .tasks import get_files_list, get_file_record, get_thermal_files
 
 
 import json
@@ -62,16 +63,8 @@ class ThermalFilesDashboardView(base.TemplateView):
     def get(self, request: http.HttpRequest, *args: Any, **kwargs: Any) -> http.HttpResponse:
         # Construct Context
         context: dict[str, Any] = {
-            "files": {
-                "page" : 1,
-                "page_size": 10,
-                "results": [],
-                "next": None,
-                "previous": None
-            }
+            "route_path": settings.DATA_STORAGE
         }
-        # return http.HttpResponseRedirect('/catalogue/entries/')
-        # Render Template and Return
         return shortcuts.render(request, self.template_name, context)
 
 class ThermalFilesUploadView(base.TemplateView):
@@ -100,14 +93,38 @@ class ThermalFilesUploadView(base.TemplateView):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def list_pending_imports(request, *args, **kwargs):
-    from django.core.paginator import Paginator
     pathToFolder = settings.PENDING_IMPORT_PATH
-    file_list = get_files_list(pathToFolder)
+    file_list = get_files_list(pathToFolder, ['.pdf', '.zip', '.7z'])
     page_param = request.GET.get('page', 1)
     page_size_param = request.GET.get('page_size', 10)
     paginator = Paginator(file_list, page_size_param)
     page = paginator.page(page_param)
-    
+   
+    return JsonResponse({
+        "count": paginator.count,
+        "hasPrevious": page.has_previous(),
+        "hasNext": page.has_next(),
+        'results': page.object_list,
+    })
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def list_thermal_folder_contents(request, *args, **kwargs):
+    dir_path = settings.DATA_STORAGE
+    page_param = request.GET.get('page', '1')
+    page_size_param = request.GET.get('page_size', '10')
+    route_path = request.GET.get('route_path', '')
+    if route_path.startswith(dir_path):
+        route_path = route_path[len(dir_path):]
+    dir_path = os.path.join(dir_path, route_path)
+
+    if not os.path.exists(dir_path):
+        return JsonResponse({'error': f'Path [{dir_path}] does not exist.'}, status=400)
+
+    file_list = get_thermal_files(dir_path, int(page_param) - 1, int(page_size_param))
+    paginator = Paginator(file_list, page_size_param)
+    page = paginator.page(page_param)
     return JsonResponse({
         "count": paginator.count,
         "hasPrevious": page.has_previous(),

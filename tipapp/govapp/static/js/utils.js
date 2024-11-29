@@ -9,6 +9,12 @@ var utils = {
     }
     return url_params;
   },
+  formatFileSize : function(bytes)  {
+    if (bytes === 0) return '0 Bytes';
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i];
+  },
   generateRandomId: function () {
     return Math.random().toString(36).slice(2, 10);
   },

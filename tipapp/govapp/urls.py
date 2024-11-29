@@ -49,6 +49,7 @@ urlpatterns = [
     urls.path("api/upload-files/thermal_files/", views.api_upload_thermal_files),
     urls.path("api/upload-files/list_pending_imports/", views.list_pending_imports),
     urls.path("api/upload-files/api_delete_thermal_file/", views.api_delete_thermal_file),
+    urls.path("api/thermal-files/list_thermal_folder_contents/", views.list_thermal_folder_contents),
     # Django Administration
     urls.path("admin/", admin.site.urls),
 
