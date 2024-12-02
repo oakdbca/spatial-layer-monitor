@@ -2,19 +2,20 @@
 
 
 # Third-Party
+import io
 import os
 import logging
 from django import http
 from django import shortcuts
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden, FileResponse
 from django.views.generic import base
 from django.contrib import auth
 from django.core.paginator import Paginator
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import permission_classes, api_view
-from rest_framework.response import Response
+from rest_framework import views
 from rest_framework.permissions import AllowAny
-from .tasks import get_files_list, get_file_record, get_thermal_files
+from .tasks import get_files_list, get_file_record, get_thermal_files, zip_thermal_file_or_folder
 
 
 import json
@@ -33,42 +34,25 @@ UserModel = auth.get_user_model()
 class HomePage(base.TemplateView):
     """Home page view."""
 
-    # Template name
     template_name = "govapp/home.html"
 
     def get(self, request: http.HttpRequest, *args: Any, **kwargs: Any) -> http.HttpResponse:
-        """Provides the GET request endpoint for the HomePage view.
-
-        Args:
-            request (http.HttpRequest): The incoming HTTP request.
-            *args (Any): Extra positional arguments.
-            **kwargs (Any): Extra keyword arguments.
-
-        Returns:
-            http.HttpResponse: The rendered template response.
-        """
-        # Construct Context
         context: dict[str, Any] = {}
-        # return http.HttpResponseRedirect('/catalogue/entries/')
-        # Render Template and Return
         return shortcuts.render(request, self.template_name, context)   
 
 
 class ThermalFilesDashboardView(base.TemplateView):
     """Thermal files view."""
-
-    # Template name
     template_name = "govapp/thermal-files/dashboard.html"
 
     def get(self, request: http.HttpRequest, *args: Any, **kwargs: Any) -> http.HttpResponse:
-        # Construct Context
         context: dict[str, Any] = {
             "route_path": settings.DATA_STORAGE
         }
         return shortcuts.render(request, self.template_name, context)
 
 class ThermalFilesUploadView(base.TemplateView):
-    """Thermal files view."""
+    """Thermal files upload."""
 
     # Template name
     template_name = "govapp/thermal-files/upload-files.html"
@@ -77,15 +61,7 @@ class ThermalFilesUploadView(base.TemplateView):
         # Construct Context
         pathToFolder = settings.PENDING_IMPORT_PATH
         file_list = os.listdir(pathToFolder)
-        context: dict[str, Any] = {
-            "file_list": {
-                "page" : 1,
-                "page_size": 10,
-                "results": file_list,
-                "next": None,
-                "previous": None
-            }
-        }
+        context: dict[str, Any] = {}
 
         return shortcuts.render(request, self.template_name, context)
 
@@ -115,14 +91,14 @@ def list_thermal_folder_contents(request, *args, **kwargs):
     page_param = request.GET.get('page', '1')
     page_size_param = request.GET.get('page_size', '10')
     route_path = request.GET.get('route_path', '')
-    if route_path.startswith(dir_path):
-        route_path = route_path[len(dir_path):]
-    dir_path = os.path.join(dir_path, route_path)
+    search = request.GET.get('search', '')
+
+    dir_path = route_path if route_path.startswith(dir_path) else os.path.join(dir_path, route_path)
 
     if not os.path.exists(dir_path):
         return JsonResponse({'error': f'Path [{dir_path}] does not exist.'}, status=400)
 
-    file_list = get_thermal_files(dir_path, int(page_param) - 1, int(page_size_param))
+    file_list = get_thermal_files(dir_path, int(page_param) - 1, int(page_size_param), search)
     paginator = Paginator(file_list, page_size_param)
     page = paginator.page(page_param)
     return JsonResponse({
@@ -170,4 +146,22 @@ def api_delete_thermal_file(request, *args, **kwargs):
         return JsonResponse({'message': f'File [{file_name}] has been deleted successfully.'})
     else:
         return JsonResponse({'error': f'File [{file_name}] does not exist.'}, status=400)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def api_download_thermal_file_or_folder(request, *args, **kwargs):
+    dir_path = settings.DATA_STORAGE
+    file_path = request.GET.get('file_path', '')
+    file_path = file_path if file_path.startswith(dir_path) else os.path.join(dir_path, file_path)
+    
+    if file_path != '' and os.path.exists(file_path):
+        
+        download_file_path = zip_thermal_file_or_folder(file_path)
+        if download_file_path:
+            filename = os.path.basename(download_file_path)
+            zip_file = open(download_file_path, 'rb')
+            return FileResponse(zip_file, as_attachment=True,  filename=filename)
+    
+    return JsonResponse({'error': f'There was an error with the download.'}, status=400)
     

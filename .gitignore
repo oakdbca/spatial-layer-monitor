@@ -8,5 +8,6 @@ venv
 tipapp/cache
 pending_imports/
 data_storage/
+thermal_downloads/
 tipapp/logs/kaartdijin_boodja.log
 tipapp/logs/kaartdijin_boodja_sql.log
