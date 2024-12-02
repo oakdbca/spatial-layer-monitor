@@ -45,14 +45,14 @@ def get_thermal_files(dir_path, page, offset, search = ""):
         
         for entry in dir_entries:
             entry_name = entry.name
-            if search != "" and not re.search(search, entry_name):
+            if search != "" and not re.search(search, str.lower(entry_name)):
                 continue
             if index >=page * offset and index < (page + 1) * offset:
                 info = entry.stat()
                 is_dir = not entry.is_file()
                 item = {"name": entry_name, "path" : entry.path , "created_at": convert_date(info.st_mtime), "is_dir": is_dir }
                 if is_dir:
-                    item['size'] = get_dir_size(entry.path+ entry_name)
+                    item['size'] = get_dir_size(entry.path)
                 else:
                     item['size'] = info.st_size
                 items.append(item)

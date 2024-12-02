@@ -1,5 +1,6 @@
 var tip_dashboard = {
   dt: null,
+  progressBar: null,
   var: {
     hasInit: false,
     page: 1,
@@ -11,12 +12,14 @@ var tip_dashboard = {
     breadcrumb: [],
     root: "",
     location: "",
+    isDownloading: false,
   },
 
   init: function () {
     const _ = tip_dashboard;
     const params = new URL(document.location.toString()).searchParams;
-    const route_path = params.get("route_path") ?? '';
+    const route_path = params.get("route_path") ?? "";
+    _.progressBar = $("#progress-bar");
 
     _.var.hasInit = false;
     _.var.page = params.get("page") ?? 1;
@@ -41,12 +44,12 @@ var tip_dashboard = {
         if (!_.var.hasInit) {
           _.var.hasInit = true;
         } else {
-          _.var.page = data && data.start ? data.start / data.length + 1 : 1
-          _.var.page_size = data?.length
-          _.var.route_path = routePathFromBreadcrum
-          _.var.search = data?.search?.value
+          _.var.page = data && data.start ? data.start / data.length + 1 : 1;
+          _.var.page_size = data?.length;
+          _.var.route_path = routePathFromBreadcrum;
+          _.var.search = data?.search?.value;
         }
-        
+
         _.get_folder_data(
           {
             page: _.var.page,
@@ -75,20 +78,28 @@ var tip_dashboard = {
       drawCallback: function (settings) {
         $("#tip_dashboard table .btn-download").on("click", function (e) {
           const filePath = $(this).data("path");
-          
+
           tip_dashboard.downloadFile(
             filePath,
             (res, status, xhr) => {
-              const blobObj = new Blob([res], { type: "application/x-7z-compressed" });
+              $("#tip_dashboard table button").attr("disabled", false);
+
+              const blobObj = new Blob([res], {
+                type: "application/x-7z-compressed",
+              });
               const objectURL = URL.createObjectURL(blobObj);
-              const a = document.createElement('a');
-              a.href = objectURL
-              a.setAttribute("download", `thermal_images_${new Date().toLocaleTimeString()}.7z`); 
-              a.click()
+              const a = document.createElement("a");
+              a.href = objectURL;
+              a.setAttribute(
+                "download",
+                `thermal_images_${new Date().toLocaleTimeString()}.7z`
+              );
+              a.click();
             },
             (error) => {
-              console.log("Failed to download file")
-              console.error(error)
+              console.log("Failed to download file");
+              console.error(error);
+              $("#tip_dashboard table button").attr("disabled", false);
             }
           );
         });
@@ -150,12 +161,14 @@ var tip_dashboard = {
       ],
     });
 
-
-    _.dt.state({start: (_.var.page - 1) * _.var.page_size,
-      page_size: _.var.page_size,
-      route_path: _.var.route_path,
-      // search: _.var.search
-    }).draw(false);
+    _.dt
+      .state({
+        start: (_.var.page - 1) * _.var.page_size,
+        page_size: _.var.page_size,
+        route_path: _.var.route_path,
+        // search: _.var.search
+      })
+      .draw(false);
   },
 
   renderBreadcrumb: function () {
@@ -171,7 +184,11 @@ var tip_dashboard = {
         ? null
         : tip_dashboard.var.location +
           "?" +
-          utils.make_query_params({ route_path: crumbs.slice(1, i + 1).join("/"), page :1, page_size: 10 });
+          utils.make_query_params({
+            route_path: crumbs.slice(1, i + 1).join("/"),
+            page: 1,
+            page_size: 10,
+          });
 
       const options = {
         class: ["breadcrumb-item", isActive ? "active" : ""].join(" "),
@@ -226,19 +243,60 @@ var tip_dashboard = {
     $.ajax({
       url: tip_dashboard.var.thermal_files_url + "download/?" + queryParams,
       method: "GET",
-      
-      xhrFields: {responseType: "blob",},
+
+      xhrFields: { responseType: "blob" },
       success: cb_success,
       error: cb_error,
       xhr: function () {
         var xhr = new window.XMLHttpRequest();
-        xhr.addEventListener("progress", handleEvent);
+        const _ = tip_dashboard;
+        _.var.isDownloading = true;
+        $("#tip_dashboard table button").attr("disabled", true);
+
+        _.progressBar.show();
+        xhr.addEventListener("progress", function handleEvent(e) {
+          console.log(
+            "Tranference: " + `${e.type}: ${e.loaded} bytes transferred\n`
+          );
+          const _ = tip_dashboard;
+          if (e.lengthComputable) {
+            var percentComplete = (e.loaded / e.total) * 100;
+            // Update progressbar
+            _.progressBar.attr("aria-valuenow", percentComplete);
+            // Display percentage text
+            _.progressBar.find(".progress-bar").width(percentComplete + "%");
+            _.progressBar
+              .find(".progress-bar")
+              .text(percentComplete.toFixed(0) + "%");
+
+            if (percentComplete === 100) {
+              setTimeout(function () {
+                try {
+                  _.progressBar.fadeOut("slow", function () {
+                    _.progressBar.attr("aria-valuenow", 0);
+                    // Display percentage text
+                    _.progressBar.find(".progress-bar").width("0%");
+                    _.progressBar.find(".progress-bar").text("0%");
+                  });
+                } catch (error) {}
+              }, 1000);
+            }
+          }
+        });
+        xhr.addEventListener("load", downloadFinished);
+        xhr.addEventListener("error", downloadFinished);
+        xhr.addEventListener("abort", downloadFinished);
         return xhr;
       },
     });
   },
 };
 
-function handleEvent(e) {
-  console.log('Tranference: ' + `${e.type}: ${e.loaded} bytes transferred\n`) 
+function downloadFinished(e) {
+  $("#tip_dashboard table button").attr("disabled", false);
+  tip_dashboard.progressBar.hide();
+  _.progressBar.attr("aria-valuenow", 0);
+  // Display percentage text
+  _.progressBar.find(".progress-bar").width("0%");
+  _.progressBar.find(".progress-bar").text("0%");
 }
