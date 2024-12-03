@@ -42,7 +42,7 @@ def trigger_error(request):
 # Django URL Patterns
 urlpatterns = [
     # Home Page
-    urls.path("", views.HomePage.as_view(), name="home"),
+    urls.path("", views.ThermalFilesDashboardView.as_view(), name="home"),
     urls.path("files-dashboard", views.ThermalFilesDashboardView.as_view(), name="files-dashboard"),
     urls.path("upload-files", views.ThermalFilesUploadView.as_view(), name="upload-files"),
     

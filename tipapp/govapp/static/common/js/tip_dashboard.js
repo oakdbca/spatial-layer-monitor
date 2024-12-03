@@ -1,6 +1,7 @@
 var tip_dashboard = {
   dt: null,
   progressBar: null,
+  progressContainer: null,
   var: {
     hasInit: false,
     page: 1,
@@ -19,11 +20,12 @@ var tip_dashboard = {
     const _ = tip_dashboard;
     const params = new URL(document.location.toString()).searchParams;
     const route_path = params.get("route_path") ?? "";
-    _.progressBar = $("#progress-bar");
+    _.progressContainer = $("#progress-container");
+    _.progressBar = _.progressContainer.find("#progress-bar");
 
     _.var.hasInit = false;
-    _.var.page = params.get("page") ?? 1;
-    _.var.page_size = params.get("size") ?? 10;
+    _.var.page = Number(params.get("page")) || 1;
+    _.var.page_size = Number(params.get("page_size")) || 10;
     _.var.route_path = route_path;
     _.var.search = params.get("search") ?? "";
 
@@ -78,9 +80,10 @@ var tip_dashboard = {
       drawCallback: function (settings) {
         $("#tip_dashboard table .btn-download").on("click", function (e) {
           const filePath = $(this).data("path");
-
+          const isDirectory = $(this).data("isDir") === true;
           tip_dashboard.downloadFile(
             filePath,
+            isDirectory,
             (res, status, xhr) => {
               $("#tip_dashboard table button").attr("disabled", false);
 
@@ -99,6 +102,7 @@ var tip_dashboard = {
             (error) => {
               console.log("Failed to download file");
               console.error(error);
+
               $("#tip_dashboard table button").attr("disabled", false);
             }
           );
@@ -154,6 +158,7 @@ var tip_dashboard = {
               {
                 class: "btn-download btn btn-outline-dark border border-0",
                 "data-path": row.path,
+                "data-isDir": row.is_dir,
               }
             );
           },
@@ -161,14 +166,12 @@ var tip_dashboard = {
       ],
     });
 
-    _.dt
-      .state({
-        start: (_.var.page - 1) * _.var.page_size,
-        page_size: _.var.page_size,
-        route_path: _.var.route_path,
-        // search: _.var.search
-      })
-      .draw(false);
+    _.dt.state({
+      start: (_.var.page - 1) * _.var.page_size,
+      length: _.var.page_size,
+      route_path: _.var.route_path,
+    });
+    _.dt.search(_.var.search);
   },
 
   renderBreadcrumb: function () {
@@ -187,7 +190,7 @@ var tip_dashboard = {
           utils.make_query_params({
             route_path: crumbs.slice(1, i + 1).join("/"),
             page: 1,
-            page_size: 10,
+            page_size: tip_dashboard.var.page_size,
           });
 
       const options = {
@@ -235,7 +238,7 @@ var tip_dashboard = {
       error: cb_error,
     });
   },
-  downloadFile: function (filePath, cb_success, cb_error) {
+  downloadFile: function (filePath, isDirectory, cb_success, cb_error) {
     const queryParams = utils.make_query_params({
       file_path: filePath,
     });
@@ -243,17 +246,25 @@ var tip_dashboard = {
     $.ajax({
       url: tip_dashboard.var.thermal_files_url + "download/?" + queryParams,
       method: "GET",
+      timeout: 15 * 60 * 1000, // sets timeout to 3 seconds
 
       xhrFields: { responseType: "blob" },
       success: cb_success,
-      error: cb_error,
+      error: (e) => {
+        downloadFinished(e);
+        if (cb_error) cb_error(e);
+      },
       xhr: function () {
         var xhr = new window.XMLHttpRequest();
         const _ = tip_dashboard;
         _.var.isDownloading = true;
         $("#tip_dashboard table button").attr("disabled", true);
+        _.progressContainer.show();
 
-        _.progressBar.show();
+        _.progressContainer
+          .find("#filename")
+          .text(isDirectory ? "Folder: " : "" + filePath.split("/").pop());
+
         xhr.addEventListener("progress", function handleEvent(e) {
           console.log(
             "Tranference: " + `${e.type}: ${e.loaded} bytes transferred\n`
@@ -261,42 +272,57 @@ var tip_dashboard = {
           const _ = tip_dashboard;
           if (e.lengthComputable) {
             var percentComplete = (e.loaded / e.total) * 100;
-            // Update progressbar
             _.progressBar.attr("aria-valuenow", percentComplete);
-            // Display percentage text
             _.progressBar.find(".progress-bar").width(percentComplete + "%");
             _.progressBar
               .find(".progress-bar")
               .text(percentComplete.toFixed(0) + "%");
 
             if (percentComplete === 100) {
-              setTimeout(function () {
-                try {
-                  _.progressBar.fadeOut("slow", function () {
-                    _.progressBar.attr("aria-valuenow", 0);
-                    // Display percentage text
-                    _.progressBar.find(".progress-bar").width("0%");
-                    _.progressBar.find(".progress-bar").text("0%");
-                  });
-                } catch (error) {}
-              }, 1000);
+              downloadFinished();
             }
           }
         });
-        xhr.addEventListener("load", downloadFinished);
-        xhr.addEventListener("error", downloadFinished);
-        xhr.addEventListener("abort", downloadFinished);
+        xhr.addEventListener("error", downloadError);
+        xhr.addEventListener("abort", downloadError);
         return xhr;
       },
     });
   },
 };
 
+function downloadError(e) {
+  const _ = tip_dashboard;
+  const { markup } = utils;
+  _.var.isDownloading = false;
+
+  const errorAlert = markup(
+    "div",
+    [
+      markup("button", "", {
+        class: "btn-close",
+        "data-bs-dismiss": "alert",
+        "aria-label": "Close",
+        type: "button",
+      }),
+      "There was an error downloading the file",
+    ],
+    { class: "alert alert-danger alert-dismissible fade show" }
+  );
+  $(errorAlert).insertAfter(_.progressContainer);
+}
 function downloadFinished(e) {
-  $("#tip_dashboard table button").attr("disabled", false);
-  tip_dashboard.progressBar.hide();
-  _.progressBar.attr("aria-valuenow", 0);
-  // Display percentage text
-  _.progressBar.find(".progress-bar").width("0%");
-  _.progressBar.find(".progress-bar").text("0%");
+  const _ = tip_dashboard;
+  _.var.isDownloading = false;
+
+  setTimeout(function () {
+    try {
+      _.progressContainer.fadeOut("slow", function () {
+        _.progressContainer.find("#filename").empty();
+        _.progressBar.attr("aria-valuenow", 0);
+        _.progressBar.find(".progress-bar").width("0%");
+        _.progressBar.find(".progress-bar").text("0%");
+      });
+    } catch (error) {}
+  }, 5000);
 }

@@ -45,7 +45,7 @@ def get_thermal_files(dir_path, page, offset, search = ""):
         
         for entry in dir_entries:
             entry_name = entry.name
-            if search != "" and not re.search(search, str.lower(entry_name)):
+            if search != "" and not re.search(str.lower(search), str.lower(entry_name)):
                 continue
             if index >=page * offset and index < (page + 1) * offset:
                 info = entry.stat()
@@ -77,12 +77,13 @@ def zip_thermal_file_or_folder(dir_path):
         if not os.path.exists(dir_path):
             return None           
         
+        arcname = os.path.basename(dir_path)
         if os.path.isfile(dir_path):
             with py7zr.SevenZipFile(download_file_path, 'w') as archive:
-                archive.write(dir_path)
+                archive.write(dir_path, arcname=arcname)
         else:
             with py7zr.SevenZipFile(download_file_path, 'w') as archive:
-                archive.writeall(dir_path)
+                archive.writeall(dir_path, arcname=arcname)
             
         return download_file_path
     except Exception as e:
