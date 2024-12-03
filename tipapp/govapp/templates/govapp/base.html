@@ -1,5 +1,5 @@
 {% extends "webtemplate_dbca/base_b5_auth_session.html" %}
-
+{% load static %}
 {% block extra_css %}
     <link rel="stylesheet" type="text/css" href="/static/common/css/select2.css?ver={{ GIT_COMMIT_HASH }}"/>
     <link rel="stylesheet" type="text/css" href="/static/common/css/select2-bootstrap-5-theme.css?ver={{ GIT_COMMIT_HASH }}"/>
@@ -8,9 +8,16 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="/static/js/tip.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<script src="/static/js/utils.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<script src="/static/js/common.pagination.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<script src="/static/js/table.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<script src="/static/common/js/tip_upload.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<script src="/static/common/js/tip_dashboard.js?ver={{ GIT_COMMIT_HASH }}"></script>
 <script src="/static/common/js/select2.js?ver={{ GIT_COMMIT_HASH }}"></script>
 <!-- any extra javascript goes here -->
+<!-- datatables -->
+<link href="/static/common/css/datatables.css" rel="stylesheet" />
+<script src="/static/common/js/datatables.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
 {% endblock %}
 
 {% block header_top_menu %}

@@ -11,5 +11,6 @@
 		   "--hostname","thermal-image-processing-dev"
 		   ],
 	"forwardPorts": [9196,9197,9198,9199,9200],
-	"initializeCommand" : ""
+	"initializeCommand" : "${localEnv:HOME}/docker-scripts-dev/windows_vbox/postgres_docker_load_2404.sh"
+
 }
