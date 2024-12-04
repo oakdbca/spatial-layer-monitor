@@ -21,7 +21,7 @@ class Command(base.BaseCommand):
     def handle(self, *args, **kwargs) -> None:
         """Handles the management command functionality."""
         # Display information
-        self.stdout.write("Scanning staging area")
+        self.stdout.write("Processing imported files...")
         ImportsProcessor(settings.PENDING_IMPORT_PATH).process_files()
 
         

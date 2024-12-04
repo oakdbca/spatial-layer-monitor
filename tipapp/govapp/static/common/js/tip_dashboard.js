@@ -246,7 +246,7 @@ var tip_dashboard = {
     $.ajax({
       url: tip_dashboard.var.thermal_files_url + "download/?" + queryParams,
       method: "GET",
-      timeout: 15 * 60 * 1000, // sets timeout to 3 seconds
+      timeout: 15 * 60 * 1000, // sets timeout to 15 minutes
 
       xhrFields: { responseType: "blob" },
       success: cb_success,
@@ -319,9 +319,9 @@ function downloadFinished(e) {
     try {
       _.progressContainer.fadeOut("slow", function () {
         _.progressContainer.find("#filename").empty();
-        _.progressBar.attr("aria-valuenow", 0);
-        _.progressBar.find(".progress-bar").width("0%");
-        _.progressBar.find(".progress-bar").text("0%");
+        _.progressBar.attr("aria-valuenow", 5);
+        _.progressBar.find(".progress-bar").width("5%");
+        _.progressBar.find(".progress-bar").text("5%");
       });
     } catch (error) {}
   }, 5000);

@@ -22,9 +22,7 @@ class ImportsProcessor():
         seen_datetime = datetime.strftime(current_datetime, '%Y-%m-%d %H:%M:%S')
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(settings.__file__))))
         try:
-            if (os.path.isabs(self.path)):
-                logger.info("Path is absolute")
-            else:                
+            if (not os.path.isabs(self.path)):
                 self.path = os.path.join(BASE_DIR, self.path)
                 
             for entry in os.scandir(self.path):
@@ -42,10 +40,8 @@ class ImportsProcessor():
                         script_path = os.path.join(BASE_DIR, 'thermalimageprocessing/thermal_image_processing.sh')
                         result = subprocess.run(["/bin/bash", script_path, entry.path], capture_output=True, text=True, check=True)
                         logger.info(result)
-                        pass
                     except Exception as e:
                         logger.info (e)
                         logger.info (e.output)
         except Exception as e:
             logger.error(e)
-        pass

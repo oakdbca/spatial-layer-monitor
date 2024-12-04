@@ -14,6 +14,7 @@ sleep 10
 echo "STARTING"
 echo $filename
 cp $filename   $folder_path/thermal_data_processing/$basename_filename
+rm $filename
 cd $folder_path/thermal_data_processing/
 echo "Uncompressing file $filename"
 
