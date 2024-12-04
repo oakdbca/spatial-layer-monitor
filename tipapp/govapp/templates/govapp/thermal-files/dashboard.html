@@ -18,14 +18,16 @@
                   <div class="alert alert-info alert-dismissible fade show" role="alert" id="progress-container" style="display: none;" >
                       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     <div class="row">
-                        <div  class="col-md-4">
-                            <h6>Download in progress</h6>
+                        <div class="col-md-4">
+                            <h6>Download in progress
+                               <div class="spinner-border spinner-border-sm text-secondary ms-2" role="status" ></div>
+                            </h6>
                             <span id="filename">
                             </span>
                         </div>
                         <div class="col-md-8">
-                            <div id="progress-bar" class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 0%"></div>
+                            <div id="progress-bar" class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 5%">5%</div>
                               </div>
                         </div>
                     </div>

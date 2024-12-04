@@ -11,3 +11,5 @@ data_storage/
 thermal_downloads/
 tipapp/logs/kaartdijin_boodja.log
 tipapp/logs/kaartdijin_boodja_sql.log
+tipapp/thermal_data_processing
+tipapp/logs/log.txt
