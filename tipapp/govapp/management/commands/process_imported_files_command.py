@@ -1,4 +1,4 @@
-"""Kaartdijin Boodja Catalogue Scan Management Command."""
+"""Thermal Image Processing Management Command."""
 
 
 # Third-Party

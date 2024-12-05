@@ -1,4 +1,4 @@
-"""Kaartdijin Boodja Catalogue Django Application Command Views."""
+"""Thermal Image Processing Django Application Command Views."""
 
 
 # Standard

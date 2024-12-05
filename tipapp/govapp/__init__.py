@@ -1,4 +1,4 @@
-"""The Kaartdijin Boodja DBCA Django Project."""
+"""The Thermal Image Processing DBCA Django Project."""
 import sys
 
 

@@ -1,1 +1,1 @@
-"""Kaartdijin Boodja Django Applications."""
+"""Thermal Image Processing Django Applications."""
