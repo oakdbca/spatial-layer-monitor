@@ -36,7 +36,7 @@ var tip_upload = {
       headerCallback: function (thead, data, start, end, display) {
         $(thead).addClass("table-dark");
       },
-      columns: [{ data: "path" }, { data: "created_at" }],
+      columns: [{ data: "name" }, { data: "created_at" }],
     });
 
     const mainSelector = ".file-upload";

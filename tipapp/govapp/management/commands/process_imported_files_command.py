@@ -22,7 +22,7 @@ class Command(base.BaseCommand):
         """Handles the management command functionality."""
         # Display information
         self.stdout.write("Processing imported files...")
-        ImportsProcessor(settings.PENDING_IMPORT_PATH).process_files()
+        ImportsProcessor(settings.PENDING_IMPORT_PATH, settings.UPLOADS_HISTORY_PATH).process_files()
 
         
         

@@ -12,8 +12,9 @@ logger = logging.getLogger(__name__)
 
 class ImportsProcessor():
 
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, source_path, dest_path):
+        self.path = source_path
+        self.dest_path = dest_path
 
     def process_files(self):
         logger.info(f"Processing pending Imports from : {self.path}")
@@ -38,7 +39,9 @@ class ImportsProcessor():
                 if two_char_extension == '.7z' or three_char_extension == '.zip':
                     try:
                         script_path = os.path.join(BASE_DIR, 'thermalimageprocessing/thermal_image_processing.sh')
-                        result = subprocess.run(["/bin/bash", script_path, entry.path], capture_output=True, text=True, check=True)
+                        dest_path = os.path.join(BASE_DIR, self.dest_path)
+                        logger.info("Destination folder "+str(dest_path))
+                        result = subprocess.run(["/bin/bash", script_path, entry.path, dest_path], capture_output=True, text=True, check=True)
                         logger.info(result)
                     except Exception as e:
                         logger.info (e)

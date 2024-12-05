@@ -60,9 +60,22 @@ class ThermalFilesUploadView(base.TemplateView):
     def get(self, request: http.HttpRequest, *args: Any, **kwargs: Any) -> http.HttpResponse:
         # Construct Context
         pathToFolder = settings.PENDING_IMPORT_PATH
-        file_list = os.listdir(pathToFolder)
         context: dict[str, Any] = {}
 
+        return shortcuts.render(request, self.template_name, context)
+
+
+class UploadsHistoryView(base.TemplateView):
+    """Thermal files uploaded after processing."""
+
+    # Template name
+    template_name = "govapp/thermal-files/uploads-history.html"
+
+    def get(self, request: http.HttpRequest, *args: Any, **kwargs: Any) -> http.HttpResponse:
+        # Construct Context
+        context: dict[str, Any] = {
+            "route_path": settings.UPLOADS_HISTORY_PATH
+        }
         return shortcuts.render(request, self.template_name, context)
 
 
@@ -88,6 +101,30 @@ def list_pending_imports(request, *args, **kwargs):
 @permission_classes([AllowAny])
 def list_thermal_folder_contents(request, *args, **kwargs):
     dir_path = settings.DATA_STORAGE
+    page_param = request.GET.get('page', '1')
+    page_size_param = request.GET.get('page_size', '10')
+    route_path = request.GET.get('route_path', '')
+    search = request.GET.get('search', '')
+
+    dir_path = route_path if route_path.startswith(dir_path) else os.path.join(dir_path, route_path)
+
+    if not os.path.exists(dir_path):
+        return JsonResponse({'error': f'Path [{dir_path}] does not exist.'}, status=400)
+
+    file_list = get_thermal_files(dir_path, int(page_param) - 1, int(page_size_param), search)
+    paginator = Paginator(file_list, page_size_param)
+    page = paginator.page(page_param)
+    return JsonResponse({
+        "count": paginator.count,
+        "hasPrevious": page.has_previous(),
+        "hasNext": page.has_next(),
+        'results': page.object_list,
+    })
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def list_uploads_history_contents(request, *args, **kwargs):
+    dir_path = settings.UPLOADS_HISTORY_PATH
     page_param = request.GET.get('page', '1')
     page_size_param = request.GET.get('page_size', '10')
     route_path = request.GET.get('route_path', '')
