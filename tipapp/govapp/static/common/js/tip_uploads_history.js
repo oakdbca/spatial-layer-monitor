@@ -34,10 +34,15 @@ var tip_uploads_history = {
     _.var.breadcrumb = route_path.split("/");
 
     _.renderBreadcrumb();
+    _.renderDataTable();
+    utils.register_prevent_from_leaving(_.var);
+  },
+  renderDataTable: function () {
+    const _ = tip_uploads_history;
 
-    // tip_uploads_history.get_pending_imports();
     _.dt = $("#tip_uploads_history table").DataTable({
       serverSide: true,
+      language: utils.datatable.common.language,
       ajax: function (data, callback, settings) {
         const routePathFromBreadcrum = _.var.breadcrumb
           .filter((b, i) => i > 0)
@@ -85,7 +90,7 @@ var tip_uploads_history = {
             filePath,
             isDirectory,
             (res, status, xhr) => {
-              $("#tip_uploads_history table button").attr("disabled", false);
+              $(".button-download").attr("disabled", false);
 
               const blobObj = new Blob([res], {
                 type: "application/x-7z-compressed",
@@ -100,10 +105,7 @@ var tip_uploads_history = {
               a.click();
             },
             (error) => {
-              console.log("Failed to download file");
-              console.error(error);
-
-              $("#tip_uploads_history table button").attr("disabled", false);
+              $(".button-download").attr("disabled", false);
             }
           );
         });
@@ -173,11 +175,11 @@ var tip_uploads_history = {
     });
     _.dt.search(_.var.search);
   },
-
   renderBreadcrumb: function () {
-    const breadcrumb = $("#dashboard-breadcrumb");
+    const _ = tip_uploads_history;
+    const breadcrumb = $("#breadcrumb");
     breadcrumb.empty();
-    const crumbs = tip_uploads_history.var.breadcrumb ?? [];
+    const crumbs = _.var.breadcrumb ?? [];
     crumbs.unshift("");
     for (let i = 0; i < crumbs.length; i++) {
       const crumb = crumbs[i];
@@ -185,12 +187,12 @@ var tip_uploads_history = {
 
       const href = isActive
         ? null
-        : tip_uploads_history.var.location +
+        : _.var.location +
           "?" +
           utils.make_query_params({
             route_path: crumbs.slice(1, i + 1).join("/"),
             page: 1,
-            page_size: tip_uploads_history.var.page_size,
+            page_size: _.var.page_size,
           });
 
       const options = {
@@ -202,7 +204,12 @@ var tip_uploads_history = {
         utils.markup(
           "li",
 
-          isActive ? crumb : utils.markup("a", crumb || "root", { href }),
+          isActive
+            ? crumb
+            : utils.markup("a", crumb || "root", {
+                href,
+                class: "text-decoration-none",
+              }),
           options
         )
       );
@@ -217,9 +224,10 @@ var tip_uploads_history = {
   },
 
   get_folder_data: function (params, cb_success, cb_error) {
+    const _ = tip_uploads_history;
     const _params = {
-      page: params?.page ?? tip_uploads_history.var.page,
-      page_size: params?.page_size ?? tip_uploads_history.var.page_size,
+      page: params?.page ?? _.var.page,
+      page_size: params?.page_size ?? _.var.page_size,
       route_path: params?.route_path ?? "",
       search: params?.search ?? "",
     };
@@ -227,10 +235,7 @@ var tip_uploads_history = {
     history.replaceState(null, null, "?" + queryParams.toString());
 
     $.ajax({
-      url:
-        tip_uploads_history.var.thermal_files_url +
-        "list_uploaded_files/?" +
-        queryParams,
+      url: _.var.thermal_files_url + "list_uploaded_files/?" + queryParams,
       method: "GET",
       dataType: "json",
       contentType: "application/json",
@@ -239,26 +244,30 @@ var tip_uploads_history = {
     });
   },
   downloadFile: function (filePath, isDirectory, cb_success, cb_error) {
+    const _ = tip_uploads_history;
     const queryParams = utils.make_query_params({
       file_path: filePath,
     });
 
     $.ajax({
-      url: tip_uploads_history.var.thermal_files_url + "download/?" + queryParams,
+      url: _.var.thermal_files_url + "download/?" + queryParams,
       method: "GET",
       timeout: 15 * 60 * 1000, // sets timeout to 15 minutes
 
       xhrFields: { responseType: "blob" },
-      success: cb_success,
-      error: (e) => {
-        downloadFinished(e);
+      success: function (res, status, xhr) {
+        if (cb_success) cb_success(res, status, xhr);
+      },
+      error: function (e) {
+        const _ = tip_dashboard;
+        _.downloadFinished(e);
         if (cb_error) cb_error(e);
       },
       xhr: function () {
         var xhr = new window.XMLHttpRequest();
         const _ = tip_uploads_history;
         _.var.isDownloading = true;
-        $("#tip_uploads_history table button").attr("disabled", true);
+        $(".button-download").attr("disabled", true);
         _.progressContainer.show();
 
         _.progressContainer
@@ -279,50 +288,50 @@ var tip_uploads_history = {
               .text(percentComplete.toFixed(0) + "%");
 
             if (percentComplete === 100) {
-              downloadFinished();
+              _.downloadFinished();
             }
           }
         });
-        xhr.addEventListener("error", downloadError);
-        xhr.addEventListener("abort", downloadError);
+        xhr.addEventListener("error", _.downloadError);
+        xhr.addEventListener("abort", _.downloadError);
         return xhr;
       },
     });
   },
+
+  downloadError: function (e) {
+    const _ = tip_uploads_history;
+    const { markup } = utils;
+    _.var.isDownloading = false;
+
+    const errorAlert = markup(
+      "div",
+      [
+        markup("button", "", {
+          class: "btn-close",
+          "data-bs-dismiss": "alert",
+          "aria-label": "Close",
+          type: "button",
+        }),
+        "There was an error downloading the file",
+      ],
+      { class: "alert alert-danger alert-dismissible fade show" }
+    );
+    $(errorAlert).insertAfter(_.progressContainer);
+  },
+  downloadFinished: function (e) {
+    const _ = tip_uploads_history;
+    _.var.isDownloading = false;
+
+    setTimeout(function () {
+      try {
+        _.progressContainer.fadeOut("slow", function () {
+          _.progressContainer.find("#filename").empty();
+          _.progressBar.attr("aria-valuenow", 5);
+          _.progressBar.find(".progress-bar").width("5%");
+          _.progressBar.find(".progress-bar").text("5%");
+        });
+      } catch (error) {}
+    }, 2000);
+  },
 };
-
-function downloadError(e) {
-  const _ = tip_uploads_history;
-  const { markup } = utils;
-  _.var.isDownloading = false;
-
-  const errorAlert = markup(
-    "div",
-    [
-      markup("button", "", {
-        class: "btn-close",
-        "data-bs-dismiss": "alert",
-        "aria-label": "Close",
-        type: "button",
-      }),
-      "There was an error downloading the file",
-    ],
-    { class: "alert alert-danger alert-dismissible fade show" }
-  );
-  $(errorAlert).insertAfter(_.progressContainer);
-}
-function downloadFinished(e) {
-  const _ = tip_uploads_history;
-  _.var.isDownloading = false;
-
-  setTimeout(function () {
-    try {
-      _.progressContainer.fadeOut("slow", function () {
-        _.progressContainer.find("#filename").empty();
-        _.progressBar.attr("aria-valuenow", 5);
-        _.progressBar.find(".progress-bar").width("5%");
-        _.progressBar.find(".progress-bar").text("5%");
-      });
-    } catch (error) {}
-  }, 5000);
-}

@@ -12,11 +12,11 @@
             </div>
             <div class="card-body">
                 <nav aria-label="breadcrumb">
-                    <ol id="dashboard-breadcrumb" class="breadcrumb">
+                    <ol id="breadcrumb" class="breadcrumb">
                     </ol>
-                  </nav>
-                  <div class="alert alert-info alert-dismissible fade show" role="alert" id="progress-container" style="display: none;" >
-                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </nav>
+                <div class="alert alert-info alert-dismissible fade show" role="alert" id="progress-container" style="display: none;" >
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     <div class="row">
                         <div class="col-md-4">
                             <h6>Download in progress
@@ -28,10 +28,10 @@
                         <div class="col-md-8">
                             <div id="progress-bar" class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">
                                 <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 5%">5%</div>
-                              </div>
+                            </div>
                         </div>
                     </div>
-                  </div>
+                </div>
                 <div id="tip_dashboard">
                     <table id="example" class="table" style="width:100%">
                         <tbody id='publish-tbody'>
@@ -39,7 +39,7 @@
                               <td colspan="8" class='text-center'>Loading...</td>
                         </tr>
                         </tbody>
-                  </table>  
+                    </table>  
                 </div>
               
             
@@ -49,6 +49,5 @@
     <script>
         tip_dashboard.init()
     </script>
-  
 </div>
 {% endblock %}

@@ -34,10 +34,14 @@ var tip_dashboard = {
     _.var.breadcrumb = route_path.split("/");
 
     _.renderBreadcrumb();
-
-    // tip_dashboard.get_pending_imports();
+    _.renderDataTable();
+    utils.register_prevent_from_leaving(_.var);
+  },
+  renderDataTable: function () {
+    const _ = tip_dashboard;
     _.dt = $("#tip_dashboard table").DataTable({
       serverSide: true,
+      language: utils.datatable.common.language,
       ajax: function (data, callback, settings) {
         const routePathFromBreadcrum = _.var.breadcrumb
           .filter((b, i) => i > 0)
@@ -78,35 +82,38 @@ var tip_dashboard = {
         $(thead).addClass("table-light");
       },
       drawCallback: function (settings) {
-        $("#tip_dashboard table .btn-download").on("click", function (e) {
-          const filePath = $(this).data("path");
-          const isDirectory = $(this).data("isDir") === true;
-          tip_dashboard.downloadFile(
-            filePath,
-            isDirectory,
-            (res, status, xhr) => {
-              $("#tip_dashboard table button").attr("disabled", false);
+        $("#tip_dashboard table .btn-download, #breadcrumb .btn-download").on(
+          "click",
+          function (e) {
+            const filePath = $(this).data("path");
+            const isDirectory = $(this).data("isDir") === true;
+            tip_dashboard.downloadFile(
+              filePath,
+              isDirectory,
+              (res, status, xhr) => {
+                $(".button-download").attr("disabled", false);
 
-              const blobObj = new Blob([res], {
-                type: "application/x-7z-compressed",
-              });
-              const objectURL = URL.createObjectURL(blobObj);
-              const a = document.createElement("a");
-              a.href = objectURL;
-              a.setAttribute(
-                "download",
-                `thermal_images_${new Date().toLocaleTimeString()}.7z`
-              );
-              a.click();
-            },
-            (error) => {
-              console.log("Failed to download file");
-              console.error(error);
+                const blobObj = new Blob([res], {
+                  type: "application/x-7z-compressed",
+                });
+                const objectURL = URL.createObjectURL(blobObj);
+                const a = document.createElement("a");
+                a.href = objectURL;
+                a.setAttribute(
+                  "download",
+                  `thermal_images_${new Date().toLocaleTimeString()}.7z`
+                );
+                a.click();
+              },
+              (error) => {
+                console.log("Failed to download file");
+                console.error(error);
 
-              $("#tip_dashboard table button").attr("disabled", false);
-            }
-          );
-        });
+                $(".button-download").attr("disabled", false);
+              }
+            );
+          }
+        );
       },
       columns: [
         {
@@ -173,11 +180,11 @@ var tip_dashboard = {
     });
     _.dt.search(_.var.search);
   },
-
   renderBreadcrumb: function () {
-    const breadcrumb = $("#dashboard-breadcrumb");
+    const _ = tip_dashboard;
+    const breadcrumb = $("#breadcrumb");
     breadcrumb.empty();
-    const crumbs = tip_dashboard.var.breadcrumb ?? [];
+    const crumbs = _.var.breadcrumb ?? [];
     crumbs.unshift("");
     for (let i = 0; i < crumbs.length; i++) {
       const crumb = crumbs[i];
@@ -185,12 +192,12 @@ var tip_dashboard = {
 
       const href = isActive
         ? null
-        : tip_dashboard.var.location +
+        : _.var.location +
           "?" +
           utils.make_query_params({
             route_path: crumbs.slice(1, i + 1).join("/"),
             page: 1,
-            page_size: tip_dashboard.var.page_size,
+            page_size: _.var.page_size,
           });
 
       const options = {
@@ -202,10 +209,30 @@ var tip_dashboard = {
         utils.markup(
           "li",
 
-          isActive ? crumb : utils.markup("a", crumb || "root", { href }),
+          isActive
+            ? crumb
+            : utils.markup("a", crumb || "root", {
+                href,
+                class: "text-decoration-none",
+              }),
           options
         )
       );
+      if (crumb !== "" && i === crumbs.length - 1) {
+        breadcrumb.append(
+          utils.markup(
+            "button",
+            { tag: "i", class: "bi bi-download" },
+            {
+              class:
+                "btn-download btn btn-sm btn-outline-secondary border border-0",
+              "data-path": crumbs.slice(1, i + 1).join("/"),
+              "data-isDir": true,
+              style: "margin-top: -3px;",
+            }
+          )
+        );
+      }
     }
   },
 
@@ -217,9 +244,10 @@ var tip_dashboard = {
   },
 
   get_folder_data: function (params, cb_success, cb_error) {
+    const _ = tip_dashboard;
     const _params = {
-      page: params?.page ?? tip_dashboard.var.page,
-      page_size: params?.page_size ?? tip_dashboard.var.page_size,
+      page: params?.page ?? _.var.page,
+      page_size: params?.page_size ?? _.var.page_size,
       route_path: params?.route_path ?? "",
       search: params?.search ?? "",
     };
@@ -228,7 +256,7 @@ var tip_dashboard = {
 
     $.ajax({
       url:
-        tip_dashboard.var.thermal_files_url +
+        _.var.thermal_files_url +
         "list_thermal_folder_contents/?" +
         queryParams,
       method: "GET",
@@ -239,26 +267,30 @@ var tip_dashboard = {
     });
   },
   downloadFile: function (filePath, isDirectory, cb_success, cb_error) {
+    const _ = tip_dashboard;
     const queryParams = utils.make_query_params({
       file_path: filePath,
     });
 
     $.ajax({
-      url: tip_dashboard.var.thermal_files_url + "download/?" + queryParams,
+      url: _.var.thermal_files_url + "download/?" + queryParams,
       method: "GET",
       timeout: 15 * 60 * 1000, // sets timeout to 15 minutes
 
       xhrFields: { responseType: "blob" },
-      success: cb_success,
-      error: (e) => {
-        downloadFinished(e);
+      success: function (res, status, xhr) {
+        if (cb_success) cb_success(res, status, xhr);
+      },
+      error: function (e) {
+        const _ = tip_dashboard;
+        _.downloadFinished(e);
         if (cb_error) cb_error(e);
       },
       xhr: function () {
         var xhr = new window.XMLHttpRequest();
         const _ = tip_dashboard;
         _.var.isDownloading = true;
-        $("#tip_dashboard table button").attr("disabled", true);
+        $(".button-download").attr("disabled", true);
         _.progressContainer.show();
 
         _.progressContainer
@@ -279,50 +311,50 @@ var tip_dashboard = {
               .text(percentComplete.toFixed(0) + "%");
 
             if (percentComplete === 100) {
-              downloadFinished();
+              _.downloadFinished();
             }
           }
         });
-        xhr.addEventListener("error", downloadError);
-        xhr.addEventListener("abort", downloadError);
+        xhr.addEventListener("error", _.downloadError);
+        xhr.addEventListener("abort", _.downloadError);
         return xhr;
       },
     });
   },
+
+  downloadError: function (e) {
+    const _ = tip_dashboard;
+    const { markup } = utils;
+    _.var.isDownloading = false;
+
+    const errorAlert = markup(
+      "div",
+      [
+        markup("button", "", {
+          class: "btn-close",
+          "data-bs-dismiss": "alert",
+          "aria-label": "Close",
+          type: "button",
+        }),
+        "There was an error downloading the file",
+      ],
+      { class: "alert alert-danger alert-dismissible fade show" }
+    );
+    $(errorAlert).insertAfter(_.progressContainer);
+  },
+  downloadFinished: function (e) {
+    const _ = tip_dashboard;
+    _.var.isDownloading = false;
+
+    setTimeout(function () {
+      try {
+        _.progressContainer.fadeOut("slow", function () {
+          _.progressContainer.find("#filename").empty();
+          _.progressBar.attr("aria-valuenow", 5);
+          _.progressBar.find(".progress-bar").width("5%");
+          _.progressBar.find(".progress-bar").text("5%");
+        });
+      } catch (error) {}
+    }, 2000);
+  },
 };
-
-function downloadError(e) {
-  const _ = tip_dashboard;
-  const { markup } = utils;
-  _.var.isDownloading = false;
-
-  const errorAlert = markup(
-    "div",
-    [
-      markup("button", "", {
-        class: "btn-close",
-        "data-bs-dismiss": "alert",
-        "aria-label": "Close",
-        type: "button",
-      }),
-      "There was an error downloading the file",
-    ],
-    { class: "alert alert-danger alert-dismissible fade show" }
-  );
-  $(errorAlert).insertAfter(_.progressContainer);
-}
-function downloadFinished(e) {
-  const _ = tip_dashboard;
-  _.var.isDownloading = false;
-
-  setTimeout(function () {
-    try {
-      _.progressContainer.fadeOut("slow", function () {
-        _.progressContainer.find("#filename").empty();
-        _.progressBar.attr("aria-valuenow", 5);
-        _.progressBar.find(".progress-bar").width("5%");
-        _.progressBar.find(".progress-bar").text("5%");
-      });
-    } catch (error) {}
-  }, 5000);
-}
