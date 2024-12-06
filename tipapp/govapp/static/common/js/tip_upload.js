@@ -1,4 +1,4 @@
-var tip_upload = {
+let tip_upload = {
   dt: null,
   var: {
     page: 1,
@@ -14,6 +14,7 @@ var tip_upload = {
 
     _.dt = $("#pending-imports table").DataTable({
       serverSide: true,
+      language: utils.datatable.common.language,
       ajax: function (data, callback, settings) {
         _.get_pending_imports_data(
           {
@@ -36,7 +37,7 @@ var tip_upload = {
       headerCallback: function (thead, data, start, end, display) {
         $(thead).addClass("table-dark");
       },
-      columns: [{ data: "path" }, { data: "created_at" }],
+      columns: [{ data: "name" }, { data: "created_at" }],
     });
 
     const mainSelector = ".file-upload";
@@ -209,8 +210,8 @@ var tip_upload = {
 
   deleteFile: function (fileName) {
     // Make an AJAX request to delete the file
-    var csrf_token = $("#csrfmiddlewaretoken").val();
-    var xhr = $.ajax({
+    let csrf_token = $("#csrfmiddlewaretoken").val();
+    let xhr = $.ajax({
       url: tip_upload.var.upload_files_url + "api_delete_thermal_file/", // Change the URL to your delete file endpoint
       type: "POST",
       headers: { "X-CSRFToken": csrf_token }, // Include CSRF token in headers
@@ -224,10 +225,10 @@ var tip_upload = {
 
   cancelUpload: function () {
     $(".cross-sign").each(function () {
-      var newFilename = $(this).data("newfilename");
+      let newFilename = $(this).data("newfilename");
       tip_upload.deleteFile(newFilename);
     });
-    var progressBarContainer = $("#progressBars");
+    let progressBarContainer = $("#progressBars");
     progressBarContainer.empty();
   },
 
@@ -235,19 +236,19 @@ var tip_upload = {
   uploadFiles: function (files) {
     let xhrList = [];
     let completed = 0;
-    var csrf_token = $("#csrfmiddlewaretoken").val();
+    let csrf_token = $("#csrfmiddlewaretoken").val();
 
-    for (var i = 0; i < files.length; i++) {
-      var fileName = files[i].name;
-      var newFileName = tip_upload.addDateTimeToFilename(fileName);
+    for (let i = 0; i < files.length; i++) {
+      let fileName = files[i].name;
+      let newFileName = tip_upload.addDateTimeToFilename(fileName);
 
       // Generate progressbar per file
-      var { progressBar, progressBarContainer, deleteIcon } =
+      let { progressBar, progressBarContainer, deleteIcon } =
         tip_upload.createProgressBar(fileName, newFileName);
       $("#progressBars").append(progressBarContainer);
 
       (function (index, progressBar, progressBarContainer) {
-        var formData = new FormData();
+        const formData = new FormData();
         formData.append("file", files[index]);
         formData.append("newFileName", newFileName);
 
@@ -256,7 +257,7 @@ var tip_upload = {
             xhrList[index].abort();
             return;
           } else {
-            var newFileName = $(this).attr("data-new-file-name");
+            const newFileName = $(this).attr("data-new-file-name");
             tip_upload.deleteFile(newFileName);
           }
           progressBarContainer.fadeOut("slow", function () {
@@ -265,7 +266,7 @@ var tip_upload = {
         });
 
         // Upload
-        var xhr = $.ajax({
+        const xhr = $.ajax({
           url: tip_upload.var.upload_files_url + "thermal_files/",
           type: "POST",
           headers: { "X-CSRFToken": csrf_token },
@@ -274,12 +275,12 @@ var tip_upload = {
           contentType: false,
           processData: false,
           xhr: function () {
-            var xhr = new window.XMLHttpRequest();
+            const xhr = new window.XMLHttpRequest();
             xhr.upload.addEventListener(
               "progress",
               function (evt) {
                 if (evt.lengthComputable) {
-                  var percentComplete = (evt.loaded / evt.total) * 100;
+                  const percentComplete = (evt.loaded / evt.total) * 100;
                   // Update progressbar
                   progressBar
                     .find(".progress-bar")
@@ -294,17 +295,26 @@ var tip_upload = {
 
                   if (percentComplete === 100) {
                     // Change progressbar color to green
+                    deleteIcon.remove()
                     progressBar
-                      .find(".progress-bar")
-                      .removeClass("bg-info")
-                      .addClass("bg-success");
-                    setTimeout(function () {
-                      try {
-                        progressBarContainer.fadeOut("slow", function () {
-                          $(this).remove();
-                        });
-                      } catch (error) {}
-                    }, 1000);
+                    .find(".progress-bar")
+                    .removeClass("bg-info")
+                    .addClass("bg-success");
+                    setTimeout(() => {
+                      const spinner = utils.markup(
+                        "div",
+                        [ 
+                          utils.markup("div", "", {
+                          class: "spinner-border spinner-border-sm spinn text-success",
+                          role: "status",
+                        }), {tag: "span", content: "Processing file", class: "text-success"}],
+                        { class: "d-flex gap-2 w-100" }
+                      )
+                      $(spinner).insertBefore(progressBar);
+                      progressBar.remove();
+                      
+                    }, 1000)
+                    
                   }
                 }
               },
@@ -313,7 +323,9 @@ var tip_upload = {
             return xhr;
           },
           success: function (response) {
-            console.log("File uploaded successfully:", response);
+            progressBarContainer.fadeOut("slow", function () {
+              $(this).remove();
+            });
             if (++completed === xhrList.length) {
               tip_upload?.dt.draw(["page"]);
             }
@@ -323,7 +335,7 @@ var tip_upload = {
               tip_upload?.dt.draw(["page"]);
             }
             if (!xhr.responseText) return;
-            var errorResponse = JSON.parse(xhr.responseText);
+            let errorResponse = JSON.parse(xhr.responseText);
             progressBar.fadeOut("slow", function () {
               progressBar.replaceWith(
                 $(

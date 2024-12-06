@@ -1,4 +1,4 @@
-"""ASGI config for the Kaartdijin Boodja project.
+"""ASGI config for the Thermal Image Processing project.
 
 It exposes the ASGI callable as a module-level variable named `application`.
 

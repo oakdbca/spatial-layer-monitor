@@ -1,4 +1,4 @@
-var tip_dashboard = {
+var tip_uploads_history = {
   dt: null,
   progressBar: null,
   progressContainer: null,
@@ -17,7 +17,7 @@ var tip_dashboard = {
   },
 
   init: function () {
-    const _ = tip_dashboard;
+    const _ = tip_uploads_history;
     const params = new URL(document.location.toString()).searchParams;
     const route_path = params.get("route_path") ?? "";
     _.progressContainer = $("#progress-container");
@@ -38,8 +38,9 @@ var tip_dashboard = {
     utils.register_prevent_from_leaving(_.var);
   },
   renderDataTable: function () {
-    const _ = tip_dashboard;
-    _.dt = $("#tip_dashboard table").DataTable({
+    const _ = tip_uploads_history;
+
+    _.dt = $("#tip_uploads_history table").DataTable({
       serverSide: true,
       language: utils.datatable.common.language,
       ajax: function (data, callback, settings) {
@@ -82,38 +83,32 @@ var tip_dashboard = {
         $(thead).addClass("table-light");
       },
       drawCallback: function (settings) {
-        $("#tip_dashboard table .btn-download, #breadcrumb .btn-download").on(
-          "click",
-          function (e) {
-            const filePath = $(this).data("path");
-            const isDirectory = $(this).data("isDir") === true;
-            tip_dashboard.downloadFile(
-              filePath,
-              isDirectory,
-              (res, status, xhr) => {
-                $(".button-download").attr("disabled", false);
+        $("#tip_uploads_history table .btn-download").on("click", function (e) {
+          const filePath = $(this).data("path");
+          const isDirectory = $(this).data("isDir") === true;
+          tip_uploads_history.downloadFile(
+            filePath,
+            isDirectory,
+            (res, status, xhr) => {
+              $(".button-download").attr("disabled", false);
 
-                const blobObj = new Blob([res], {
-                  type: "application/x-7z-compressed",
-                });
-                const objectURL = URL.createObjectURL(blobObj);
-                const a = document.createElement("a");
-                a.href = objectURL;
-                a.setAttribute(
-                  "download",
-                  `thermal_images_${new Date().toLocaleTimeString()}.7z`
-                );
-                a.click();
-              },
-              (error) => {
-                console.log("Failed to download file");
-                console.error(error);
-
-                $(".button-download").attr("disabled", false);
-              }
-            );
-          }
-        );
+              const blobObj = new Blob([res], {
+                type: "application/x-7z-compressed",
+              });
+              const objectURL = URL.createObjectURL(blobObj);
+              const a = document.createElement("a");
+              a.href = objectURL;
+              a.setAttribute(
+                "download",
+                `thermal_images_${new Date().toLocaleTimeString()}.7z`
+              );
+              a.click();
+            },
+            (error) => {
+              $(".button-download").attr("disabled", false);
+            }
+          );
+        });
       },
       columns: [
         {
@@ -123,7 +118,7 @@ var tip_dashboard = {
             if (!row.is_dir) return utils.markup("span", data);
             const path = row.path.replace(_.var.root, "");
             const href =
-              tip_dashboard.var.location +
+              tip_uploads_history.var.location +
               "?" +
               utils.make_query_params({ route_path: path });
 
@@ -181,7 +176,7 @@ var tip_dashboard = {
     _.dt.search(_.var.search);
   },
   renderBreadcrumb: function () {
-    const _ = tip_dashboard;
+    const _ = tip_uploads_history;
     const breadcrumb = $("#breadcrumb");
     breadcrumb.empty();
     const crumbs = _.var.breadcrumb ?? [];
@@ -218,33 +213,18 @@ var tip_dashboard = {
           options
         )
       );
-      if (crumb !== "" && i === crumbs.length - 1) {
-        breadcrumb.append(
-          utils.markup(
-            "button",
-            { tag: "i", class: "bi bi-download" },
-            {
-              class:
-                "btn-download btn btn-sm btn-outline-secondary border border-0",
-              "data-path": crumbs.slice(1, i + 1).join("/"),
-              "data-isDir": true,
-              style: "margin-top: -3px;",
-            }
-          )
-        );
-      }
     }
   },
 
   handle_folder_click: function (e) {
     const folder = $(this).data("folder");
-    const _ = tip_dashboard;
+    const _ = tip_uploads_history;
     _.var.breadcrumb = folder.split("/");
     _.dt.draw(true);
   },
 
   get_folder_data: function (params, cb_success, cb_error) {
-    const _ = tip_dashboard;
+    const _ = tip_uploads_history;
     const _params = {
       page: params?.page ?? _.var.page,
       page_size: params?.page_size ?? _.var.page_size,
@@ -255,10 +235,7 @@ var tip_dashboard = {
     history.replaceState(null, null, "?" + queryParams.toString());
 
     $.ajax({
-      url:
-        _.var.thermal_files_url +
-        "list_thermal_folder_contents/?" +
-        queryParams,
+      url: _.var.thermal_files_url + "list_uploaded_files/?" + queryParams,
       method: "GET",
       dataType: "json",
       contentType: "application/json",
@@ -267,7 +244,7 @@ var tip_dashboard = {
     });
   },
   downloadFile: function (filePath, isDirectory, cb_success, cb_error) {
-    const _ = tip_dashboard;
+    const _ = tip_uploads_history;
     const queryParams = utils.make_query_params({
       file_path: filePath,
     });
@@ -288,7 +265,7 @@ var tip_dashboard = {
       },
       xhr: function () {
         var xhr = new window.XMLHttpRequest();
-        const _ = tip_dashboard;
+        const _ = tip_uploads_history;
         _.var.isDownloading = true;
         $(".button-download").attr("disabled", true);
         _.progressContainer.show();
@@ -301,7 +278,7 @@ var tip_dashboard = {
           console.log(
             "Tranference: " + `${e.type}: ${e.loaded} bytes transferred\n`
           );
-          const _ = tip_dashboard;
+          const _ = tip_uploads_history;
           if (e.lengthComputable) {
             var percentComplete = (e.loaded / e.total) * 100;
             _.progressBar.attr("aria-valuenow", percentComplete);
@@ -323,7 +300,7 @@ var tip_dashboard = {
   },
 
   downloadError: function (e) {
-    const _ = tip_dashboard;
+    const _ = tip_uploads_history;
     const { markup } = utils;
     _.var.isDownloading = false;
 
@@ -343,7 +320,7 @@ var tip_dashboard = {
     $(errorAlert).insertAfter(_.progressContainer);
   },
   downloadFinished: function (e) {
-    const _ = tip_dashboard;
+    const _ = tip_uploads_history;
     _.var.isDownloading = false;
 
     setTimeout(function () {

@@ -1,4 +1,4 @@
-"""Kaartdijin Boodja URL Configuration.
+"""Thermal Image Processing URL Configuration.
 
 The `urlpatterns` list routes URLs to views.
 For more information please see:
@@ -45,11 +45,13 @@ urlpatterns = [
     urls.path("", views.ThermalFilesDashboardView.as_view(), name="home"),
     urls.path("files-dashboard", views.ThermalFilesDashboardView.as_view(), name="files-dashboard"),
     urls.path("upload-files", views.ThermalFilesUploadView.as_view(), name="upload-files"),
+    urls.path("uploads-history", views.UploadsHistoryView.as_view(), name="uploads-history"),
     
     urls.path("api/upload-files/thermal_files/", views.api_upload_thermal_files),
     urls.path("api/upload-files/list_pending_imports/", views.list_pending_imports),
     urls.path("api/upload-files/api_delete_thermal_file/", views.api_delete_thermal_file),
     urls.path("api/thermal-files/list_thermal_folder_contents/", views.list_thermal_folder_contents),
+    urls.path("api/thermal-files/list_uploaded_files/", views.list_uploads_history_contents),
     urls.path("api/thermal-files/download/", views.api_download_thermal_file_or_folder),
     # Django Administration
     urls.path("admin/", admin.site.urls),

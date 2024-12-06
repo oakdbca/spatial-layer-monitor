@@ -1,4 +1,4 @@
-"""WSGI config for the Kaartdijin Boodja project.
+"""WSGI config for the Thermal Image Processing project.
 
 It exposes the WSGI callable as a module-level variable named `application`.
 
