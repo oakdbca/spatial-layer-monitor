@@ -58,6 +58,10 @@ COPY python-cron ./
 RUN whoami
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt 
 
+COPY tipapp ./
+COPY thermalimageprocessing ./
+COPY manage.py ./
+
 # Install the project (ensure that frontend projects have been built prior to this step).
 FROM python_libs_thermal_processing
 COPY timezone /etc/timezone
