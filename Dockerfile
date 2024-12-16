@@ -42,6 +42,12 @@ RUN apt-get install --no-install-recommends -y python3-pil
 ENV TZ=Australia/Perth
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+COPY requirements.txt ./
+COPY python-cron ./
+RUN whoami
+RUN /app/venv/bin/pip3 install --no-cache-dir -r requirements.txt 
+
+
 COPY startup.sh /
 RUN chmod 755 /startup.sh
 
