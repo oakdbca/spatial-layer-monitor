@@ -61,6 +61,7 @@ RUN /app/venv/bin/pip3 install --no-cache-dir -r requirements.txt
 # Install the project (ensure that frontend projects have been built prior to this step).
 FROM python_libs_thermal_processing
 COPY timezone /etc/timezone
+COPY gunicorn.ini ./
 
 COPY .git ./.git
 
