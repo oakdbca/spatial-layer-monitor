@@ -9,7 +9,7 @@ from django.core.cache import cache
 # Typing
 from typing import Any
 
-from govapp import settings
+from tipapp import settings
 
 
 def variables(request: http.HttpRequest) -> dict[str, Any]:

@@ -21,7 +21,7 @@ from .tasks import get_files_list, get_file_record, get_thermal_files, zip_therm
 import json
 
 # Internal
-from govapp import settings
+from tipapp import settings
 
 # Typing
 from typing import Any
