@@ -54,13 +54,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "webtemplate_dbca",
-    "govapp",
-    # "govapp.apps.accounts",
-    # "govapp.apps.catalogue",
-    # "govapp.apps.emails",
-    # "govapp.apps.logs",
-    # "govapp.apps.publisher",
-    # "govapp.apps.swagger",
+    "tipapp",
     "rest_framework",
     "rest_framework_datatables",
     "drf_spectacular",
@@ -92,15 +86,15 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dbca_utils.middleware.SSOLoginMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "govapp.middleware.CacheControl",
+    "tipapp.middleware.CacheControl",
     'django.middleware.locale.LocaleMiddleware',
 ]
-ROOT_URLCONF = "govapp.urls"
+ROOT_URLCONF = "tipapp.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            BASE_DIR / "govapp/templates",
+            BASE_DIR / "tipapp/templates",
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -109,12 +103,12 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "govapp.context_processors.variables",
+                "tipapp.context_processors.variables",
             ],
         },
     },
 ]
-WSGI_APPLICATION = "govapp.wsgi.application"
+WSGI_APPLICATION = "tipapp.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -149,7 +143,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
-    BASE_DIR / "govapp/static",  # Look for static files in the frontend
+    BASE_DIR / "tipapp/static",  # Look for static files in the frontend
     # BASE_DIR / "govapp/frontend/node_modules"  # node modules that are collected and used in the frontend
 ]
 
@@ -282,14 +276,6 @@ EMAIL_DELIVERY = decouple.config("EMAIL_DELIVERY", default="off")
 #CRON_SCANNER_CLASS = "govapp.apps.catalogue.cron.ScannerCronJob"
 
 CRON_CLASSES = [
-    # "govapp.apps.catalogue.cron.PostgresScannerCronJob",
-    # "govapp.apps.catalogue.cron.SharepointScannerCronJob",
-    # "govapp.apps.catalogue.cron.DirectoryScannerCronJob",
-    # "govapp.apps.publisher.cron.PublishGeoServerQueueCronJob",
-    # "govapp.apps.publisher.cron.GeoServerLayerHealthcheckCronJob",
-    # "govapp.apps.publisher.cron.GeoServerSyncLayersCronJob", # layers
-    # "govapp.apps.publisher.cron.GeoServerSyncRulesCronJob", # rules
-    # "govapp.apps.accounts.cron.GeoServerSyncUsersCronJob", # users
     'appmonitor_client.cron.CronJobAppMonitorClient'
 ]
 MANAGEMENT_COMMANDS_PAGE_ENABLED = decouple.config('MANAGEMENT_COMMANDS_PAGE_ENABLED', default=False)

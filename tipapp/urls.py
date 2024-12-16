@@ -25,7 +25,7 @@ from django.contrib.auth import views as auth_views
 
 
 # Local
-from govapp import views
+from tipapp import views
 # from govapp.apps.accounts.views import FileDeleteView, FileDownloadView, FileListView
 # from govapp.default_data_manager import DefaultDataManager
 

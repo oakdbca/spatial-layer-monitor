@@ -6,7 +6,7 @@ import logging
 import subprocess
 from datetime import datetime
 # Local
-from govapp import settings
+from tipapp import settings
 
 logger = logging.getLogger(__name__)
 

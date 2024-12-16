@@ -8,8 +8,8 @@ import subprocess
 from django.core.management import base
 from datetime import datetime
 # Local
-from govapp import settings
-from govapp.imports_processor import ImportsProcessor
+from tipapp import settings
+from tipapp.imports_processor import ImportsProcessor
 logger = logging.getLogger(__name__)
 
 

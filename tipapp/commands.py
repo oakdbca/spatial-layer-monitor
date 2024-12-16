@@ -17,8 +17,8 @@ from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 
 # Local
-from govapp.apps.accounts import permissions
-from govapp.common.utils import UserGroupServiceNotFoundError
+from tipapp.apps.accounts import permissions
+from tipapp.common.utils import UserGroupServiceNotFoundError
 
 # Logging
 log = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class ManagementCommands(viewsets.ViewSet):
     @decorators.action(detail=False, methods=["POST"])
     def randomize_password(self, request: request.Request) -> response.Response:
         try:
-            management.call_command("runcrons", "govapp.apps.catalogue.cron.DirectoryScannerCronJob", "--force")
+            management.call_command("runcrons", "tipapp.apps.catalogue.cron.DirectoryScannerCronJob", "--force")
         except Exception as exc:
             # Log
             log.error(f"Unable to perform randomize_password: {exc}")
@@ -90,7 +90,7 @@ class ManagementCommands(viewsets.ViewSet):
             # be able to run the scanner if its already running. The `--force`
             # option is used to allow us to call the scanner whenever we want,
             # but it does not bypass the concurrency locking.
-            management.call_command("runcrons", "govapp.apps.catalogue.cron.DirectoryScannerCronJob", "--force")
+            management.call_command("runcrons", "tipapp.apps.catalogue.cron.DirectoryScannerCronJob", "--force")
 
         except Exception as exc:
             # Log
@@ -119,7 +119,7 @@ class ManagementCommands(viewsets.ViewSet):
             # be able to run the scanner if its already running. The `--force`
             # option is used to allow us to call the scanner whenever we want,
             # but it does not bypass the concurrency locking.
-            management.call_command("runcrons", "govapp.apps.catalogue.cron.SharepointScannerCronJob", "--force")
+            management.call_command("runcrons", "tipapp.apps.catalogue.cron.SharepointScannerCronJob", "--force")
 
         except Exception as exc:
             # Log
@@ -132,7 +132,7 @@ class ManagementCommands(viewsets.ViewSet):
     @decorators.action(detail=False, methods=["POST"])
     def get_postgis_submissions(self, request: request.Request) -> response.Response:
         try:
-            management.call_command("runcrons", "govapp.apps.catalogue.cron.PostgresScannerCronJob", "--force")
+            management.call_command("runcrons", "tipapp.apps.catalogue.cron.PostgresScannerCronJob", "--force")
         except Exception as exc:
             log.error(f"Unable to perform scan: {exc}")
 
@@ -151,7 +151,7 @@ class ManagementCommands(viewsets.ViewSet):
         """
         # Handle Errors
         try:
-            management.call_command("runcrons", "govapp.apps.publisher.cron.PublishGeoServerQueueCronJob", "--force")
+            management.call_command("runcrons", "tipapp.apps.publisher.cron.PublishGeoServerQueueCronJob", "--force")
 
         except Exception as exc:
             # Log
@@ -212,7 +212,7 @@ class ManagementCommands(viewsets.ViewSet):
     @decorators.action(detail=False, methods=["POST"])
     def perform_geoserver_layer_healthcheck(self, request: request.Request) -> response.Response:
         try:
-            management.call_command("runcrons", "govapp.apps.publisher.cron.GeoServerLayerHealthcheckCronJob", "--force")
+            management.call_command("runcrons", "tipapp.apps.publisher.cron.GeoServerLayerHealthcheckCronJob", "--force")
         except Exception as exc:
             log.error(f"Unable to perform scan: {exc}")
 

@@ -15,7 +15,7 @@ from django.core import asgi
 
 
 # Set Django settings environment variable
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "govapp.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tipapp.settings")
 
 # Create ASGI handler
 application = asgi.get_asgi_application()

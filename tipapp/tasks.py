@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import py7zr
 
-from govapp import settings
+from tipapp import settings
 
 logger = logging.getLogger(__name__)
 
