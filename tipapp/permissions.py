@@ -58,7 +58,7 @@ def is_administrator(user: Union[models.User, models.AnonymousUser]) -> bool:
         bool: Whether the user is in the Administrator group.
     """
     # Check and Return
-    group = django.contrib.auth.models.Group.objects.filter(name=settings.GROUP_ADMINISTRATORS).first()
+    group = django.contrib.auth.models.Group.objects.filter(name=settings.GROUP_ADMIN).first()
     return (
         not isinstance(user, models.AnonymousUser)  # Must be logged in
         and group is not None
