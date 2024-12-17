@@ -216,14 +216,14 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'kaartdijin_boodja.log'),
+            'filename': os.path.join(BASE_DIR, 'logs', 'tip_app.log'),
             'formatter': 'verbose2',
             'maxBytes': 5242880
         },
         'file_for_sql': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'kaartdijin_boodja_sql.log'),
+            'filename': os.path.join(BASE_DIR, 'logs', 'tip_app_sql.log'),
             'formatter': 'verbose2',
             'maxBytes': 5242880
         },
@@ -264,11 +264,8 @@ PRODUCTION_EMAIL= decouple.config("PRODUCTION_EMAIL", default=False, cast=bool)
 EMAIL_DELIVERY = decouple.config("EMAIL_DELIVERY", default="off")
 
 # Group Settings
-# This must match what is in the database
-# GROUP_ADMINISTRATOR_ID = 1
-# GROUP_ADMINISTRATOR_NAME = "Administrators"
-# GROUP_CATALOGUE_EDITOR_ID = 2
-# GROUP_CATALOGUE_EDITOR_NAME = "Catalogue Editors"
+GROUP_ADMIN = 'Admin'
+GROUP_OFFICERS = 'Officers'
 
 # Cron Jobs
 # https://django-cron.readthedocs.io/en/latest/installation.html
