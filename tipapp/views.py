@@ -2,26 +2,22 @@
 
 
 # Third-Party
-import io
 import os
 import logging
+
 from django import http
 from django import shortcuts
-from django.http import JsonResponse, HttpResponseForbidden, FileResponse
+from django.http import JsonResponse, FileResponse
 from django.views.generic import base
 from django.contrib import auth
 from django.core.paginator import Paginator
-from django.utils.decorators import method_decorator
 from rest_framework.decorators import permission_classes, api_view
-from rest_framework import views
-from rest_framework.permissions import AllowAny
-from .tasks import get_files_list, get_file_record, get_thermal_files, zip_thermal_file_or_folder
 
-
-import json
 
 # Internal
 from tipapp import settings
+from tipapp.tasks import get_files_list, get_file_record, get_thermal_files, zip_thermal_file_or_folder
+from tipapp.permissions import IsInAdministratorsGroup, IsInAdminOrOfficersGroup, IsInOfficersGroup
 
 # Typing
 from typing import Any
@@ -47,7 +43,8 @@ class ThermalFilesDashboardView(base.TemplateView):
 
     def get(self, request: http.HttpRequest, *args: Any, **kwargs: Any) -> http.HttpResponse:
         context: dict[str, Any] = {
-            "route_path": settings.DATA_STORAGE
+            "route_path": settings.DATA_STORAGE,
+            'has_permission': IsInAdminOrOfficersGroup().has_permission(request, self),
         }
         return shortcuts.render(request, self.template_name, context)
 
@@ -59,8 +56,10 @@ class ThermalFilesUploadView(base.TemplateView):
 
     def get(self, request: http.HttpRequest, *args: Any, **kwargs: Any) -> http.HttpResponse:
         # Construct Context
-        pathToFolder = settings.PENDING_IMPORT_PATH
-        context: dict[str, Any] = {}
+        context: dict[str, Any] = {
+            'has_view_permission': IsInAdminOrOfficersGroup().has_permission(request, self),
+            'has_upload_permission': IsInAdministratorsGroup().has_permission(request, self),
+        }
 
         return shortcuts.render(request, self.template_name, context)
 
@@ -74,13 +73,14 @@ class UploadsHistoryView(base.TemplateView):
     def get(self, request: http.HttpRequest, *args: Any, **kwargs: Any) -> http.HttpResponse:
         # Construct Context
         context: dict[str, Any] = {
-            "route_path": settings.UPLOADS_HISTORY_PATH
+            "route_path": settings.UPLOADS_HISTORY_PATH,
+            'has_permission': IsInAdminOrOfficersGroup().has_permission(request, self),
         }
         return shortcuts.render(request, self.template_name, context)
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([IsInAdminOrOfficersGroup])
 def list_pending_imports(request, *args, **kwargs):
     pathToFolder = settings.PENDING_IMPORT_PATH
     file_list = get_files_list(pathToFolder, ['.pdf', '.zip', '.7z'])
@@ -98,7 +98,7 @@ def list_pending_imports(request, *args, **kwargs):
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([IsInAdminOrOfficersGroup])
 def list_thermal_folder_contents(request, *args, **kwargs):
     dir_path = settings.DATA_STORAGE
     page_param = request.GET.get('page', '1')
@@ -122,7 +122,7 @@ def list_thermal_folder_contents(request, *args, **kwargs):
     })
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([IsInAdminOrOfficersGroup])
 def list_uploads_history_contents(request, *args, **kwargs):
     dir_path = settings.UPLOADS_HISTORY_PATH
     page_param = request.GET.get('page', '1')
@@ -146,7 +146,7 @@ def list_uploads_history_contents(request, *args, **kwargs):
     })
 
 @api_view(["POST"])
-@permission_classes([AllowAny])
+@permission_classes([IsInAdministratorsGroup])
 def api_upload_thermal_files(request, *args, **kwargs):
     if request.FILES:
         # uploaded_files = []  # Multiple files might be uploaded
@@ -174,7 +174,7 @@ def api_upload_thermal_files(request, *args, **kwargs):
         return JsonResponse({'error': 'No file(s) were uploaded.'}, status=400)
 
 @api_view(["POST"])
-@permission_classes([AllowAny])
+@permission_classes([IsInAdministratorsGroup])
 def api_delete_thermal_file(request, *args, **kwargs):
     file_name = request.data.get('newFileName', '')
     file_path = os.path.join(settings.PENDING_IMPORT_PATH, file_name)
@@ -186,7 +186,7 @@ def api_delete_thermal_file(request, *args, **kwargs):
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([IsInAdminOrOfficersGroup])
 def api_download_thermal_file_or_folder(request, *args, **kwargs):
     dir_path = settings.DATA_STORAGE
     file_path = request.GET.get('file_path', '')

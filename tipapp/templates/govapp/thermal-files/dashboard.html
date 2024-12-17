@@ -1,6 +1,7 @@
 {% extends 'govapp/base.html' %} 
 
 {% block content %}
+{% if request.user.is_authenticated is True and has_permission is True %}
 
 <div class="container" id="droppable-area">
     <input type="hidden" id="route_path" name="route_path" value="{{ route_path }}"/>
@@ -50,4 +51,11 @@
         tip_dashboard.init()
     </script>
 </div>
+{% else %}
+    <div class="container">
+        <div class="alert alert-danger" role="alert" >
+            <p>Permission Denied.</p>
+        </div>
+    </div>
+{% endif %}
 {% endblock %}

@@ -1,13 +1,15 @@
 {% extends 'govapp/base.html' %} 
 
 {% block content %}
+{% if request.user.is_authenticated is True and has_view_permission is True %}
 
 <div class="container" id="droppable-area">
+{% if has_upload_permission is True %}
   <h3>Upload Zipped Layer</h3>
   <hr class="mt-5 mb-3" />
 
   <div class="file-upload">{% include './upload-file-component.html' %}</div>
-  
+{% endif %}
 
     <div class="pending-imports my-4">
 
@@ -42,4 +44,11 @@
     </script>
   
 </div>
+{% else %}
+    <div class="container">
+        <div class="alert alert-danger" role="alert" >
+            <p>Permission Denied.</p>
+        </div>
+    </div>
+{% endif %}
 {% endblock %}
