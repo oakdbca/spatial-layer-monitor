@@ -1,5 +1,5 @@
 # Prepare the base environment.
-FROM dbcawa/thermal-image-processing:latest as builder_base_dockerdev
+FROM dbcawa/spatial-layer-monitor:latest as builder_base_dockerdev
 USER root
 RUN apt-get update
 RUN apt-get install --no-install-recommends -y patch
