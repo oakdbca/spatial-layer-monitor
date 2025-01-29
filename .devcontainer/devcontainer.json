@@ -1,16 +1,16 @@
 {
-	"name": "Thermal Imaging Processing Development",
-	"image": "dbcawa/docker_app_dev:thermal_image_processing_dev_latest",
+	"name": "Spatial Layer Monitor Development",
+	"image": "dbcawa/docker_app_dev:spatial_layer_monitor_dev_latest",
 	"remoteUser": "container",
 	"workspaceFolder": "/data/data/projects/thermal-image-processing",
 	"mounts": ["type=bind,source=/data/,target=/data/",
 	           "type=bind,source=/data/data/containerhome/,target=/home/container/"
 	          ],	
-	"appPort": [ "7029:8080","9196:9196","9197:9197","9198:9198","9199:9199","9200:9200"],
+	"appPort": [ "7031:8080","9206:9206","9207:9207","9208:9208","9209:9209","9210:9210"],
 	"runArgs": ["--env-file","${localEnv:HOME}/vscode-env/thermal-image-processing.env",
-		   "--hostname","thermal-image-processing-dev"
+		   "--hostname","spatial-layer-monitor-dev"
 		   ],
-	"forwardPorts": [9196,9197,9198,9199,9200],
+	"forwardPorts": [9206,9207,9208,9209,9210],
 	"initializeCommand" : "${localEnv:HOME}/docker-scripts-dev/windows_vbox/postgres_docker_load_2404.sh"
 
 }
