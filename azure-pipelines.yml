@@ -32,7 +32,7 @@ stages:
               latest
               $(tagDate)
         containerRegistry: DockerHub
-        repository: dbcawa/thermal-image-processing
+        repository: dbcawa/spatial-layer-monitor
       env:
         DOCKER_BUILDKIT: 1
     - task: Docker@2
@@ -41,8 +41,8 @@ stages:
         command: buildAndPush
         dockerfile: '$(Build.SourcesDirectory)/dockerdev/Dockerfile'
         tags: |
-              thermal_image_processing_dev_latest
-              thermal_image_processing_dev_$(tagDate)
+              spatial_layer_monitor_dev_latest
+              spatial_layer_monitor_dev_$(tagDate)
         containerRegistry: DockerHub
         repository: dbcawa/docker_app_dev
       env:
