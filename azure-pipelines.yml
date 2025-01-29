@@ -32,7 +32,7 @@ stages:
               latest
               $(tagDate)
         containerRegistry: DockerGitHub
-        repository: ghcr.io/dbcawa/spatial-layer-monitor
+        repository: ghcr.io/dbca-wa/spatial-layer-monitor
       env:
         DOCKER_BUILDKIT: 1
     - task: Docker@2
@@ -44,6 +44,6 @@ stages:
               spatial_layer_monitor_dev_latest
               spatial_layer_monitor_dev_$(tagDate)
         containerRegistry: DockerGitHub
-        repository: ghcr.io/dbcawa/docker_app_dev
+        repository: ghcr.io/dbca-wa/docker_app_dev
       env:
         DOCKER_BUILDKIT: 1
