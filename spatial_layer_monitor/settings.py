@@ -215,14 +215,14 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'tip_app.log'),
+            'filename': os.path.join(BASE_DIR, 'logs', 'spatial_layer_monitor.log'),
             'formatter': 'verbose2',
             'maxBytes': 5242880
         },
         'file_for_sql': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'tip_app_sql.log'),
+            'filename': os.path.join(BASE_DIR, 'logs', 'spatial_layer_monitor_sql.log'),
             'formatter': 'verbose2',
             'maxBytes': 5242880
         },

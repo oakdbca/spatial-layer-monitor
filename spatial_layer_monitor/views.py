@@ -24,18 +24,18 @@ class AddSpatialLayerInfo(View):
 
         context = {
             'title': 'Add Spatial Layer Information',
-            'auth_modes': auth_modes
+            'auth_modes': auth_modes,
+            'success': request.GET.get('success') == 'True'
         }
 
         return render(request, self.template_name, context=context)
 
     def post(self, request, *args, **kwargs):
-        
-        auth_modes = RequestAuthentication.objects.all().only('id', 'name','username',  'created_at')
-        
         urls = request.POST.getlist('layer_url')
         auth_mode = request.POST.get('auth_mode')
-        authentication = auth_modes.filter(id=auth_mode).first()    
+        authentication = None
+        if auth_mode != '':
+            RequestAuthentication.objects.filter(pk=auth_mode).first()
         for url in urls:
             urlObj = parse.urlparse(url)
             params  = parse.parse_qs(urlObj.query)
@@ -44,7 +44,4 @@ class AddSpatialLayerInfo(View):
 
             SpatialMonitor.objects.get_or_create( defaults={'name': name}, url=url, authentication=authentication,)     
 
-        return redirect('/', context={
-            'auth_modes': auth_modes,
-            'success': True
-        })
+        return redirect('/?success=True')
