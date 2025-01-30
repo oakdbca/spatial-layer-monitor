@@ -1,0 +1,105 @@
+{% extends 'govapp/base.html' %} {% block content %}
+<div class="container-sm">
+  <h1>Monitor Spatial Layers</h1>
+  <p>
+    This page allows you to add URLs of layers that might need monitoring for
+    changes. The system will check the layers at regular intervals and notify
+    you if there are any changes.
+  </p>
+
+  {% if success == True %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    Layers added successfully
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+    ></button>
+  </div>
+  {% endif %}
+
+  <form method="post" action="">
+    {% csrf_token %} {{ form.as_p }}
+    <div class="row g-3 align-items-center">
+      <div class="col-4 mb-3">
+        <label for="data_xml" class="form-label">Authentication Mode</label>
+        <select
+          name="auth_mode"
+          class="form-select"
+          aria-label="Default select example"
+        >
+          <option value="">------</option>
+          {% for auth_mode in auth_modes %}
+          <option value="{{ auth_mode.id }}">
+            {{ auth_mode.name }} - {{ auth_mode.username }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">URL</label>
+
+      <div id="url-field" class="row mt-2">
+        <div class="col-10">
+          <input type="url" class="form-control" name="layer_url" required />
+        </div>
+        <div class="col-2">
+          <button type="button" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="row my-3">
+      <div class="col-3">
+        <button class="btn btn-outline-primary" type="button">
+          <i class="bi bi-plus-lg"></i>
+          URL
+        </button>
+      </div>
+    </div>
+    <div class="align-items-right">
+      <button type="submit" class="btn btn-primary">Process</button>
+      <button type="submit" class="btn btn-secondary-outline">Clear</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  $(() => {
+    console.log("Document ready");
+    const urlDiv = document.getElementById("url-field");
+
+    const addBtn = document.querySelector("button.btn-outline-primary");
+    const removeBtn = document.querySelector("button.btn-outline-danger");
+
+    addBtn.addEventListener("click", function () {
+      const urlDiv = document.getElementById("url-field");
+      const nodeId = `url-${new Date().getTime()}`;
+
+      const node = urlDiv.cloneNode(true);
+      $(node).attr("id", nodeId);
+      $(node).find("input").val("");
+      $(node).find("button").attr("data-id", nodeId);
+      urlDiv.parentNode.append(node);
+      $(node)
+        .find("button")
+        .click(function () {
+          const id = $(this).attr("data-id");
+          $(`#${id}`).remove();
+        });
+    });
+
+    $(urlDiv)
+      .find("button")
+      .on("click", function () {
+        const urlInput = document.querySelector("input[name='layer_url']");
+        urlInput.value = "";
+      });
+  });
+</script>
+
+{% endblock %}

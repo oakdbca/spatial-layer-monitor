@@ -58,7 +58,7 @@ COPY python-cron ./
 RUN whoami
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt 
 
-COPY --chown=oim:oim tipapp tipapp
+COPY --chown=oim:oim spatial_layer_monitor spatial_layer_monitor
 COPY --chown=oim:oim thermalimageprocessing thermalimageprocessing
 COPY --chown=oim:oim manage.py ./
 

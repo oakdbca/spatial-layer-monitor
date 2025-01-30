@@ -5,10 +5,10 @@ DBCA_Districts_4326.7z
 thermal_image_processing.py.save
 thermal_image_processing_bkp.py
 venv
-tipapp/cache
-tipapp/logs/
+spatial_layer_monitor/cache
+spatial_layer_monitor/logs/
 pending_imports/
 data_storage/
 thermal_downloads/
-tipapp/thermal_data_processing
+spatial_layer_monitor/thermal_data_processing
 thermal_files_uploaded/

@@ -1,0 +1,31 @@
+from django.contrib import admin
+from .models import SpatialMonitor, SpatialMonitorHistory, SpatialQueue, RequestAuthentication
+
+@admin.register(SpatialMonitor)
+class SpatialMonitorAdmin(admin.ModelAdmin):
+    list_display = ('name', 'url', 'last_checked', 'created_at', 'authentication')
+    list_filter = ('last_checked', 'created_at', 'authentication')
+    search_fields = ('name', 'url')
+
+
+@admin.register(SpatialMonitorHistory)
+class SpatialMonitorHistoryAdmin(admin.ModelAdmin):
+    list_display = ('layer', 'hash', 'created_at', 'synced_at')
+    list_filter = ('created_at', 'synced_at')
+    search_fields = ('layer', 'hash')
+
+
+@admin.register(RequestAuthentication)
+class RequestAuthenticationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'username', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('name', 'username')
+
+    fields = ('name', 'username', 'password', 'description')
+
+    def password(self, obj):
+        return '*** CLASSIFIED *** {}'.format(obj.password)
+
+    
+
+admin.site.register(SpatialQueue)
