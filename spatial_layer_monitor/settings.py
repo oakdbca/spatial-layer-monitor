@@ -312,3 +312,6 @@ if not RUNNING_DEVSERVER and SENTRY_DSN and EMAIL_INSTANCE:
         release=APPLICATION_VERSION,
     )
 
+
+
+KMI_UPDATE_URL = decouple.config("KMI_UPDATE_URL", default=None)

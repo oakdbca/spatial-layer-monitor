@@ -5,8 +5,14 @@ import requests
 import requests.cookies
 from requests.auth import HTTPBasicAuth
 
+import logging
 import hashlib
 import io
+
+from django.conf import settings
+
+
+logger = logging.getLogger(__name__)
 
 
 def run_check_all_layers():
@@ -24,28 +30,31 @@ def check_layer(layer: SpatialMonitor):
     new_hash, error = fetch_current_image_hash(url, auth=layer.get_authentication())
     
     if new_hash and new_hash != current_hash:
-        # Create new hash
         new_hash = SpatialMonitorHistory.objects.create(layer=layer, hash=new_hash)
-        # Update layer with new hash
         layer.last_checked = new_hash.created_at
         layer.save()
-        # Add to queue
         if current_hash:
-            # SpatialQueue.objects.create(layer=new_hash)
-            pass
+            success, message = update_layer_in_kmi(new_hash, auth=layer.get_authentication(), data={
+                "name": layer.kmi_layer_name,
+            })
+            if not success:
+                logger.error('Error updating layer in KMI %s', message)
+                return
+            new_hash.sync()
+
     elif new_hash:
-        print('New hash is the same as the last hash')
+        logger.info('New hash is the same as the last hash')
     else:
         layer.description = error
         layer.save()
-        print('Error fetching new hash')
+        logger.error('Error fetching new hash from url %s', url)
 
 
 
 
 def fetch_current_image_hash(url: str, auth: tuple = None):
     
-    auhentication = auth=HTTPBasicAuth(auth[0], auth[1]) if auth else None
+    auhentication = HTTPBasicAuth(auth[0], auth[1]) if auth else None
     
     response = requests.get(url, auth=auhentication)
 
@@ -63,6 +72,20 @@ def get_image_hash(image):
     while chunk := image.read(8192):
         img_hash.update(chunk)
     return img_hash.hexdigest()
+
+
+def update_layer_in_kmi(historyLayer: SpatialMonitorHistory,  auth: tuple = None, data: dict = {}):
+    auhentication = auth=HTTPBasicAuth(auth[0], auth[1]) if auth else None
+    kmiUrl = settings.KMI_UPDATE_URL
+    if not kmiUrl:
+        logger.error("KMI URL not set")
+        return False, "KMI URL not set"
+
+    response = requests.post(kmiUrl, auth=auhentication, data=data)
+    if response.status_code == 200:
+        return True, f"Success: {response.status_code}"
+    else:
+        return False, f"Error: {response.status_code}"
 
 
 def post_layer_update(url: str,  auth: tuple = None, data: dict = {}):

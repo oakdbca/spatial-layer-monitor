@@ -31,6 +31,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('run_batch_import/', layerCacheService_views.run_batch_import, name='run_batch_import'),
+    path('mock_kmi_service/', layerCacheService_views.mock_kmi_service, name='mock_kmi_service'),
 
     urls.path('', views.AddSpatialLayerInfo.as_view(), name='home'),
     

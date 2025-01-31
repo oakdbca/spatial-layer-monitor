@@ -17,7 +17,7 @@ class RequestAuthentication(models.Model):
 class SpatialMonitor(models.Model):
     url = models.URLField(max_length=1000)
     name = models.CharField(max_length=200)
-    destination_url = models.URLField(blank=True, null=True, max_length=1000)
+    kmi_layer_name = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     last_updated = models.DateTimeField(blank=True, null=True)
 

@@ -10,6 +10,8 @@ from spatial_layer_monitor import settings
 from .models import SpatialQueue, SpatialMonitorHistory
 from .tasks import post_layer_update
 
+from django.conf import settings
+
 logger = logging.getLogger(__name__)
 
 class QueueProcessor():
@@ -25,7 +27,11 @@ class QueueProcessor():
                 layer = queue_item.layer
                 logger.info(f"Processing Layer: {layer.layer.id}")
                 try:
-                    success, result = post_layer_update(layer.url, auth=layer.layer.get_authentication(), data={})
+                    kmiUrl = settings.KMI_UPDATE_URL
+                    if not kmiUrl:
+                        logger.info(f"Layer {layer.layer.id} has no destination URL")
+                        continue
+                    success, result = post_layer_update(kmiUrl, auth=layer.layer.get_authentication(), data={})
                     logger.info(result)
                     if success:
                         layer.sync()

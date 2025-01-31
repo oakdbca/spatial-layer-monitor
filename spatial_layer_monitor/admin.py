@@ -1,12 +1,19 @@
 from django.contrib import admin
 from .models import SpatialMonitor, SpatialMonitorHistory, SpatialQueue, RequestAuthentication
 
+
+class SpatialMonitorHistoryInline(admin.TabularInline):
+    model = SpatialMonitorHistory
+    extra = 0
+    exclude = ['wkb_geometry',]
+
+
 @admin.register(SpatialMonitor)
 class SpatialMonitorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'url', 'last_checked', 'created_at', 'authentication')
+    list_display = ('name', 'kmi_layer_name', 'url', 'last_checked', 'created_at', 'authentication')
     list_filter = ('last_checked', 'created_at', 'authentication')
     search_fields = ('name', 'url')
-
+    inlines = [SpatialMonitorHistoryInline]
 
 @admin.register(SpatialMonitorHistory)
 class SpatialMonitorHistoryAdmin(admin.ModelAdmin):

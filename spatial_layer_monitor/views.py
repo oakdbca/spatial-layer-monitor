@@ -32,16 +32,17 @@ class AddSpatialLayerInfo(View):
 
     def post(self, request, *args, **kwargs):
         urls = request.POST.getlist('layer_url')
+        layer_name = request.POST.getlist('layer_name')
         auth_mode = request.POST.get('auth_mode')
         authentication = None
         if auth_mode != '':
-            RequestAuthentication.objects.filter(pk=auth_mode).first()
-        for url in urls:
+            authentication = RequestAuthentication.objects.filter(pk=auth_mode).first()
+        for (x, url) in enumerate(urls):
             urlObj = parse.urlparse(url)
             params  = parse.parse_qs(urlObj.query)
 
             name = params['layer'][0] if 'layer' in params else urlObj.path
 
-            SpatialMonitor.objects.get_or_create( defaults={'name': name}, url=url, authentication=authentication,)     
+            SpatialMonitor.objects.get_or_create( defaults={'name': name}, url=url, authentication=authentication, kmi_layer_name=layer_name[x])     
 
         return redirect('/?success=True')
