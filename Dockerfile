@@ -1,5 +1,5 @@
 # Prepare the base environment.
-FROM ubuntu:24.04 as builder_base_thermal_processing
+FROM ubuntu:24.04 as builder_base_spatial_layer_monitor
 MAINTAINER asi@dbca.wa.gov.au
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Australia/Perth
@@ -46,7 +46,7 @@ COPY startup.sh /
 RUN chmod 755 /startup.sh
 
 # Install Python libs from requirements.txt.
-FROM builder_base_thermal_processing as python_libs_thermal_processing
+FROM builder_base_spatial_layer_monitor as python_libs_spatial_layer_monitor
 WORKDIR /app
 user oim 
 RUN virtualenv /app/venv
@@ -59,11 +59,11 @@ RUN whoami
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt 
 
 COPY --chown=oim:oim spatial_layer_monitor spatial_layer_monitor
-COPY --chown=oim:oim thermalimageprocessing thermalimageprocessing
+#COPY --chown=oim:oim thermalimageprocessing thermalimageprocessing
 COPY --chown=oim:oim manage.py ./
 
 # Install the project (ensure that frontend projects have been built prior to this step).
-FROM python_libs_thermal_processing
+FROM python_libs_spatial_layer_monitor
 COPY timezone /etc/timezone
 COPY gunicorn.ini ./
 
