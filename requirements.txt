@@ -46,3 +46,8 @@ requests>=2.32.3
 anyio>=4.4.0
 GDAL==3.8.4
 setuptools==72.0.0
+
+# Field encryption
+django-cryptography-5==2.0.3
+django-appconf==1.0.6
+typing-extensions>=4.12.2

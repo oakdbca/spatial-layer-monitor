@@ -1,13 +1,13 @@
 {
 	"name": "Spatial Layer Monitor Development",
-	"image": "dbcawa/docker_app_dev:spatial_layer_monitor_dev_latest",
+	"image": "ghcr.io/dbca-wa/docker_app_dev:spatial_layer_monitor_dev_latest",
 	"remoteUser": "container",
-	"workspaceFolder": "/data/data/projects/thermal-image-processing",
+	"workspaceFolder": "/data/data/projects/spatial-layer-monitor",
 	"mounts": ["type=bind,source=/data/,target=/data/",
 	           "type=bind,source=/data/data/containerhome/,target=/home/container/"
 	          ],	
 	"appPort": [ "7031:8080","9206:9206","9207:9207","9208:9208","9209:9209","9210:9210"],
-	"runArgs": ["--env-file","${localEnv:HOME}/vscode-env/thermal-image-processing.env",
+	"runArgs": ["--env-file","${localEnv:HOME}/vscode-env/spatial-layer-monitor.env",
 		   "--hostname","spatial-layer-monitor-dev"
 		   ],
 	"forwardPorts": [9206,9207,9208,9209,9210],
