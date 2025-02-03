@@ -17,6 +17,18 @@
             "django": true,
             "autoStartBrowser": false,
 
+        },
+        {
+            "name": "Python Debugger: Task",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "python": "${workspaceFolder}/venv/bin/python",
+            "args": [
+                "process_spatial_layers_changes_command"
+            ]
+            
+
         }
     ]
 }
