@@ -28,6 +28,12 @@ def check_layer(layer: SpatialMonitor):
     current_hash = latest_hash_history.hash if latest_hash_history else None
 
     new_hash, error = fetch_current_image_hash(url, auth=layer.get_authentication())
+
+    if error:
+        layer.description = error
+        layer.save()
+        logger.error('Error fetching new hash from url %s', url)
+        return 
     
     if new_hash and new_hash != current_hash:
         new_hash = SpatialMonitorHistory.objects.create(layer=layer, hash=new_hash)
@@ -77,15 +83,19 @@ def get_image_hash(image):
 def update_layer_in_kmi(historyLayer: SpatialMonitorHistory,  auth: tuple = None, data: dict = {}):
     auhentication = auth=HTTPBasicAuth(auth[0], auth[1]) if auth else None
     kmiUrl = settings.KMI_UPDATE_URL
-    if not kmiUrl:
-        logger.error("KMI URL not set")
-        return False, "KMI URL not set"
+    try:
+        if not kmiUrl:
+            logger.error("KMI URL not set")
+            return False, "KMI URL not set"
 
-    response = requests.post(kmiUrl, auth=auhentication, data=data)
-    if response.status_code == 200:
-        return True, f"Success: {response.status_code}"
-    else:
-        return False, f"Error: {response.status_code}"
+        response = requests.post(kmiUrl, auth=auhentication, data=data)
+        if response.status_code == 200:
+            return True, f"Success: {response.status_code}"
+        else:
+            return False, f"Error: {response.status_code}"
+    except Exception as e:
+        print(e)
+        return False, f"Error: {e}"
 
 
 def post_layer_update(url: str,  auth: tuple = None, data: dict = {}):

@@ -21,7 +21,7 @@ class Command(base.BaseCommand):
     def handle(self, *args, **kwargs) -> None:
         """Handles the management command functionality."""
         # Display information
-        self.stdout.write("Processing imported files...")
+        self.stdout.write("Processing recorder layers...")
         MonitorProcessor().monitor_layers()
 
         

@@ -27,7 +27,7 @@ class SpatialMonitor(models.Model):
     authentication = models.ForeignKey(RequestAuthentication, on_delete=models.CASCADE, blank=True, null=True)
 
     def get_latest_hash(self):
-        return self.hashes.all().order_by('created_at').first()
+        return self.hashes.all().order_by('-id').first()
     
     def get_authentication(self):
         if self.authentication:
