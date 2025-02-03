@@ -27,8 +27,8 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Project specific settings
-PROJECT_TITLE = "Thermal Imaging Processing"
-PROJECT_DESCRIPTION = "System is use to process flight imaging data"
+PROJECT_TITLE = "Spatial Layer Monitor"
+PROJECT_DESCRIPTION = "DBCA System to monitor and report changes in spatial layers"
 PROJECT_VERSION = "v1"
 
 # Quick-start development settings - unsuitable for production

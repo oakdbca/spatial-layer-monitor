@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.views import View
 from django.shortcuts import render, redirect
 from rest_framework import routers, serializers, viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes
 import urllib3.contrib
 import urllib3.util
 from urllib import parse
@@ -12,9 +12,10 @@ from urllib import parse
 
 from .tasks import run_check_all_layers
 from .models import SpatialMonitor, RequestAuthentication
+from .permissions import IsInOfficersGroup, IsAdministratorMixin
 
 # Home
-class AddSpatialLayerInfo(View):
+class AddSpatialLayerInfo(IsAdministratorMixin, View):
     # Main page for adding spatial layer information
     template_name = 'spatial_layer_monitor/add_spatial_layer_info.html'
 
@@ -25,11 +26,12 @@ class AddSpatialLayerInfo(View):
         context = {
             'title': 'Add Spatial Layer Information',
             'auth_modes': auth_modes,
-            'success': request.GET.get('success') == 'True'
+            'success': request.GET.get('success') == 'True',
+            'has_permission': IsInOfficersGroup().has_permission(request, self),
         }
 
         return render(request, self.template_name, context=context)
-
+    
     def post(self, request, *args, **kwargs):
         urls = request.POST.getlist('layer_url')
         layer_name = request.POST.getlist('layer_name')
