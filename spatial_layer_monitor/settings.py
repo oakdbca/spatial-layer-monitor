@@ -314,4 +314,6 @@ if not RUNNING_DEVSERVER and SENTRY_DSN and EMAIL_INSTANCE:
 
 
 
-KMI_UPDATE_URL = decouple.config("KMI_UPDATE_URL", default=None)
+SPATIAL_UPDATE_ENDPOINT = decouple.config("SPATIAL_UPDATE_ENDPOINT", default=None)
+SPATIAL_UPDATE_USERNAME = decouple.config("SPATIAL_UPDATE_USERNAME", default=None)
+SPATIAL_UPDATE_PASSWORD = decouple.config("SPATIAL_UPDATE_PASSWORD", default=None)
