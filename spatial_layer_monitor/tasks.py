@@ -95,8 +95,6 @@ def publish_layer_update(history_layer: SpatialMonitorHistory):
 
         auhentication = HTTPBasicAuth(username, password)
         url = endpoint + '/gwc/rest/masstruncate'
-        url = endpoint + '/test_content/'
-
         data = f"<truncateLayer><layerName>{history_layer.layer.kmi_layer_name}</layerName></truncateLayer>"
 
         response = requests.post(url=url, auth=auhentication, data=data, 
@@ -110,12 +108,3 @@ def publish_layer_update(history_layer: SpatialMonitorHistory):
     except Exception as e:
         logger.error(e)
         return False, f"Error: {e}"
-
-
-def post_layer_update(url: str,  auth: tuple = None, data: dict = {}):
-    auhentication = auth=HTTPBasicAuth(auth[0], auth[1]) if auth else None
-    response = requests.post(url, auth=auhentication, data=data)
-    if response.status_code == 200:
-        return True, f"Success: {response.status_code}"
-    else:
-        return False, f"Error: {response.status_code}"
