@@ -12,48 +12,58 @@
     aria-label="Close"
   ></button>
 </div>
-{% endif  %}
+{% endif %}
 {% if request.user.is_authenticated is True and has_permission is True %}
 
-  <div class="container-sm">
-    <h1>Dashboard</h1>
-    <p>
-      Keep track of the latest changes detected in the layers. 
-    </p>
-
-    {% if success == True %}
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-      Layers added successfully
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="alert"
-        aria-label="Close"
-      ></button>
+<div class="container-sm">
+  <div
+    style="display: inline-flex; width: 100%; justify-content: space-between"
+    class="d-flex"
+  >
+    <div>
+      <h1>Dashboard</h1>
+      <p>Keep track of the latest changes detected in the layers.</p>
     </div>
-    {% endif %}
-
-    <div id="sam_dashboard">
-        <table id="example" class="table" style="width:100%">
-            <tbody id='publish-tbody'>
-            <tr>
-                  <td colspan="8" class='text-center'>Loading...</td>
-            </tr>
-            </tbody>
-      </table>  
+    <div>
+      <button class="btn btn-primary" id="sync-btn">
+        <i class="bi bi-arrow-clockwise"></i>
+        Sync
+      </button>
     </div>
   </div>
 
-  <script>
-    $(() => {
-      sam_dashboard.init()      
-    });
-  </script>
+  {% if success == True %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    Layers added successfully
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+    ></button>
+  </div>
+  {% endif %}
+
+  <div id="sam_dashboard">
+    <table id="example" class="table" style="width: 100%">
+      <tbody id="publish-tbody">
+        <tr>
+          <td colspan="8" class="text-center">Loading...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  $(() => {
+    sam_dashboard.init();
+  });
+</script>
 {% else %}
 <div class="container">
-    <div class="alert alert-danger" role="alert" >
-        <p>Permission Denied.</p>
-    </div>
+  <div class="alert alert-danger" role="alert">
+    <p>Permission Denied.</p>
+  </div>
 </div>
-{% endif %}
-{% endblock %}
+{% endif %} {% endblock %}
