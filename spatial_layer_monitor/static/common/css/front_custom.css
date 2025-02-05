@@ -1,4 +1,13 @@
-.yes-no-icon {
-    width: 1.3em;
-    height: 1.3em;
+
+.row-hash {
+    
+}
+
+.row-hash .hash {
+    color: #817e81;
+    font-weight: 600;
+    font-size: 12px;
+}
+.row-hash .layer_name {
+    
 }
