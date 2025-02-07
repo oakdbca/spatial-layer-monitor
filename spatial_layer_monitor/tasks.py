@@ -94,7 +94,7 @@ def publish_layer_update(history_layer: SpatialMonitorHistory):
             return False, f"Layer {history_layer.layer.id} doesn't have a layer name set"
 
         auhentication = HTTPBasicAuth(username, password)
-        url = endpoint + '/gwc/rest/masstruncate'
+        url = endpoint + '/geoserver/gwc/rest/masstruncate'
         data = f"<truncateLayer><layerName>{history_layer.layer.kmi_layer_name}</layerName></truncateLayer>"
 
         response = requests.post(url=url, auth=auhentication, data=data, 
