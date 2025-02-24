@@ -1,8 +1,19 @@
 from django.db.models import Q
-
+from django.core.files.storage import FileSystemStorage
 from django.db import models
+from django.conf import settings
 from django_cryptography.fields import encrypt
+from django.utils.html import format_html
 from datetime import datetime
+import uuid
+
+upload_storage = FileSystemStorage(location=settings.PRIVATE_MEDIA_ROOT)
+
+def to_history_images(instance, extension):
+    extension = extension.split('.')[-1]
+    extension = extension.lower() if extension else 'png'
+    return f'history_images/{instance.id}_{str(uuid.uuid4())}.{extension}'
+
 class RequestAuthentication(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
@@ -40,8 +51,15 @@ class SpatialMonitor(models.Model):
 class SpatialMonitorHistory(models.Model):
     layer = models.ForeignKey(SpatialMonitor, on_delete=models.CASCADE, related_name='hashes')
     hash = models.CharField(max_length=500)
+    image = models.ImageField(upload_to=to_history_images, storage=upload_storage,blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     synced_at =  models.DateTimeField(blank=True, null=True)
+
+    @property
+    def image_tag(self):
+        if not self.image:
+            return format_html('<span>No Image</span>')
+        return format_html('<a href="%s" target="_blank"> <img src="%s" width="150" height="150" /></a>' % (self.image.url, self.image.url))
 
     def sync(self):
         self.synced_at = datetime.now()

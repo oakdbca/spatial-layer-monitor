@@ -1,16 +1,15 @@
-import threading
-import urllib3
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.views import View
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.decorators import permission_classes, api_view
+from rest_framework.views import status
 import urllib3.contrib
 import urllib3.util
 from urllib import parse
+import mimetypes
 
-
-from .tasks import run_check_all_layers
+from django.http.response import HttpResponse
 from .models import SpatialMonitor, RequestAuthentication, SpatialMonitorHistory
 from .permissions import IsInOfficersGroup, IsAdministratorMixin
 from .serializers import SpatialMonitorHistorySerializer
@@ -89,3 +88,19 @@ def list_historical_records(request, *args, **kwargs):
         "hasNext": page.has_next(),
         'results': SpatialMonitorHistorySerializer(page.object_list, many=True).data,
     })
+
+
+
+@api_view(['GET'])
+@permission_classes([IsInOfficersGroup])
+def get_file(request, id, rest,extension):
+    map_file = get_object_or_404(SpatialMonitorHistory, id=id)
+    file = map_file.image
+    if file is None:
+        return HttpResponse("File doesn't exist", status=status.HTTP_404_NOT_FOUND)
+
+    file_data = None
+    with open(file.path, 'rb') as f:
+         file_data = f.read()
+         f.close()
+    return HttpResponse(file_data, content_type=mimetypes.types_map['.'+str(extension)])

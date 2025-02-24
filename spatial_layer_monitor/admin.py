@@ -6,9 +6,9 @@ from .models import SpatialMonitor, SpatialMonitorHistory, SpatialQueue, Request
 class SpatialMonitorHistoryInline(admin.TabularInline):
     model = SpatialMonitorHistory
     extra = 0
-    fields = ('hash', 'created_at', 'synced_at',)
+    fields = ('hash', 'created_at', 'synced_at', 'image_tag',)
     ordering = ('-id',)
-    readonly_fields = ('hash', 'created_at', 'synced_at',)
+    readonly_fields = ('hash', 'created_at', 'synced_at', 'image_tag',)
 
     def get_queryset(self, request):
         """

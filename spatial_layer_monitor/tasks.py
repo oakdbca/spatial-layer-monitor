@@ -1,4 +1,4 @@
-
+import uuid
 from .models  import SpatialMonitorHistory, SpatialMonitor
 
 import requests
@@ -9,6 +9,7 @@ import logging
 import hashlib
 import io
 
+from django.core.files.base import ContentFile
 from django.conf import settings
 
 
@@ -25,9 +26,9 @@ def run_check_all_layers():
 def check_layer(layer: SpatialMonitor):
     url = layer.url
     latest_hash_history = layer.get_latest_hash()
-    current_hash = latest_hash_history.hash if latest_hash_history else None
+    current_hash = str(uuid.uuid4())
 
-    new_hash, error = fetch_current_image_hash(url, auth=layer.get_authentication())
+    new_hash, image, error = fetch_current_image_hash(url, auth=layer.get_authentication())
 
     if error:
         layer.description = error
@@ -39,6 +40,9 @@ def check_layer(layer: SpatialMonitor):
         new_layer_data = SpatialMonitorHistory.objects.create(layer=layer, hash=new_hash)
         layer.last_checked = new_layer_data.created_at
         layer.save()
+        if image:
+            new_layer_data.image.save(f'{layer.name}_{new_layer_data.created_at}.png', ContentFile(image.getvalue()))
+
         if current_hash:
             success, message = publish_layer_update(new_layer_data)
             if not success:
@@ -67,9 +71,9 @@ def fetch_current_image_hash(url: str, auth: tuple = None):
     if response.status_code == 200:
         image = io.BytesIO(response.content)
         image_hash = get_image_hash(image)
-        return image_hash, None
+        return image_hash, image, None
     else:
-        return None, f"Error: {response.status_code}"
+        return None, None, f"Error: {response.status_code}"
     
 
 def get_image_hash(image):
