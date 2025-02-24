@@ -99,7 +99,24 @@ var sam_dashboard = {
               [
                 {
                   tag: "div",
-                  content: row.layer_name,
+                  content: [
+                    {
+                      tag: "span",
+                      content: row.layer_name,
+                      class: "layer_name",
+                    },
+                    {
+                      tag: "a",
+                      content: {
+                        tag: "i",
+                        content: "",
+                        class: "bi bi-image ms-2",
+                      },
+                      class: "layer_name",
+                      href: row.image,
+                      target: "_blank",
+                    },
+                  ],
                   class: "layer_name",
                 },
                 {

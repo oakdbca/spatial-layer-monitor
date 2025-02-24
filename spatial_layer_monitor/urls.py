@@ -36,4 +36,6 @@ urlpatterns = [
     urls.path('dashboard', views.HistoryDataInfoView.as_view(), name='dashboard'),
     urls.path('add-records', views.AddSpatialLayerInfoView.as_view(), name='add-records'),
     urls.path('api/list_historical_records/', views.list_historical_records),
+    urls.re_path(r'^history_images/(?P<id>\d+)(?P<rest>(\_|\w|\-)+).(?P<extension>\w\w\w)$', views.get_file, name='get_file'),
+
 ]
