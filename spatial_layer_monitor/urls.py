@@ -29,7 +29,6 @@ admin.site.site_title = conf.settings.PROJECT_TITLE
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
     path('run_batch_import/', layerCacheService_views.run_batch_import, name='run_batch_import'),
 
     urls.path('', views.HomeView.as_view(), name='home'),
