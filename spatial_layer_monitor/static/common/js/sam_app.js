@@ -88,6 +88,7 @@ var sam_dashboard = {
       headerCallback: function (thead, data, start, end, display) {
         $(thead).addClass("table-light");
       },
+      columnDefs: [{ orderable: false, targets: [0, 1, 2, 3] }],
       columns: [
         {
           title: "Hash",
@@ -147,6 +148,26 @@ var sam_dashboard = {
             if (!data) return " - ";
             const { markup } = utils;
             return markup("div", new Date(Date.parse(data)).toLocaleString());
+          },
+        },
+        {
+          title: "Image",
+          data: "image",
+          render: function (data, type, row) {
+            if (!data) return "No image";
+            const { markup } = utils;
+            return markup(
+              "a",
+              {
+                tag: "img",
+                src: window.location.origin + data,
+                alt: "Image",
+                style: "width: 100px; height: 100px;",
+                onerror: "this.style='display:none'",
+                class: "rounded",
+              },
+              { href: data, target: "_blank" }
+            );
           },
         },
       ],

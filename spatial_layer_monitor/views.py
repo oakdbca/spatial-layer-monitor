@@ -79,7 +79,9 @@ def list_historical_records(request, *args, **kwargs):
     
     search = request.GET.get('search', '')
 
-    file_list = SpatialMonitorHistory.objects.all().order_by("-id").select_related("layer")
+    file_list = SpatialMonitorHistory.objects.all().exclude(image='').order_by("-id").select_related("layer")
+    if search != '':
+        file_list = file_list.filter(layer__kmi_layer_name__icontains=search)
     paginator = Paginator(file_list, page_size_param)
     page = paginator.page(page_param)
     return JsonResponse({
@@ -100,7 +102,10 @@ def get_file(request, id, rest,extension):
         return HttpResponse("File doesn't exist", status=status.HTTP_404_NOT_FOUND)
 
     file_data = None
-    with open(file.path, 'rb') as f:
-         file_data = f.read()
-         f.close()
+    try:            
+        with open(file.path, 'rb') as f:
+            file_data = f.read()
+            f.close()
+    except Exception as e:
+        return render(request, 'govapp/404.html', context={})
     return HttpResponse(file_data, content_type=mimetypes.types_map['.'+str(extension)])
