@@ -65,10 +65,6 @@ INSTALLED_APPS = [
     "django_cron",
     "appmonitor_client",
     "django_extensions",
-    "bwf_components",
-    "bwf_components.components",
-    "bwf_components.workflow",
-    "livereload",
 ]
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
@@ -94,7 +90,6 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "spatial_layer_monitor.middleware.CacheControl",
     'django.middleware.locale.LocaleMiddleware',
-    'livereload.middleware.LiveReloadScript',
 ]
 ROOT_URLCONF = "spatial_layer_monitor.urls"
 TEMPLATES = [
@@ -102,7 +97,6 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             BASE_DIR / "spatial_layer_monitor/templates",
-            BASE_DIR / "bwf_components/templates",
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -154,10 +148,6 @@ STATICFILES_DIRS = [
     BASE_DIR / "spatial_layer_monitor/static",  # Look for static files in the frontend
     # BASE_DIR / "govapp/frontend/node_modules"  # node modules that are collected and used in the frontend
 ]
-
-
-PRIVATE_MEDIA_URL = '/'
-PRIVATE_MEDIA_ROOT = os.path.join(BASE_DIR, 'private-media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

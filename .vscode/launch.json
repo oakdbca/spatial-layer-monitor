@@ -25,9 +25,8 @@
             "program": "${workspaceFolder}/manage.py",
             "python": "${workspaceFolder}/venv/bin/python",
             "args": [
-                "run_pending_tasks"
-            ],
-            "justMyCode": false
+                "process_spatial_layers_changes_command"
+            ]
             
 
         }
