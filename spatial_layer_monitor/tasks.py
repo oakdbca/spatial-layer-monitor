@@ -26,7 +26,7 @@ def run_check_all_layers():
 def check_layer(layer: SpatialMonitor):
     url = layer.url
     latest_hash_history = layer.get_latest_hash()
-    current_hash = str(uuid.uuid4())
+    current_hash = latest_hash_history.hash if latest_hash_history else None
 
     new_hash, image, error = fetch_current_image_hash(url, auth=layer.get_authentication())
 
