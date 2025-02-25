@@ -56,6 +56,7 @@ RUN git config --global --add safe.directory /app
 COPY requirements.txt ./
 COPY python-cron ./
 RUN whoami
+RUN /app/venv/bin/pip install --upgrade pip
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt 
 
 COPY --chown=oim:oim spatial_layer_monitor spatial_layer_monitor
