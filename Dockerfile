@@ -61,6 +61,7 @@ RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 COPY --chown=oim:oim spatial_layer_monitor spatial_layer_monitor
 #COPY --chown=oim:oim thermalimageprocessing thermalimageprocessing
 COPY --chown=oim:oim manage.py ./
+RUN python manage.py collectstatic --noinput
 
 # Install the project (ensure that frontend projects have been built prior to this step).
 FROM python_libs_spatial_layer_monitor
