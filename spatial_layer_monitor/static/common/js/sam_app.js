@@ -138,7 +138,7 @@ var sam_dashboard = {
           data: "created_at",
           render: function (data, type, row) {
             const { markup } = utils;
-            return markup("div", new Date(Date.parse(data)).toLocaleString());
+            return markup("div", moment(data).format("DD MMM YYYY HH:mm:ss a"));
           },
         },
         {
@@ -147,7 +147,7 @@ var sam_dashboard = {
           render: function (data, type, row) {
             if (!data) return " - ";
             const { markup } = utils;
-            return markup("div", new Date(Date.parse(data)).toLocaleString());
+            return markup("div", moment(data).format("DD MMM YYYY HH:mm:ss a"));
           },
         },
         {
