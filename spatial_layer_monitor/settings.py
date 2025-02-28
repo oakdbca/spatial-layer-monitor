@@ -289,25 +289,6 @@ RUNNING_DEVSERVER = len(sys.argv) > 1 and sys.argv[1] == "runserver"
 CSRF_TRUSTED_ORIGINS_STRING = decouple.config("CSRF_TRUSTED_ORIGINS", default='[]')
 CSRF_TRUSTED_ORIGINS = json.loads(str(CSRF_TRUSTED_ORIGINS_STRING))
 
-# Sentry settings
-SENTRY_DSN = decouple.config("SENTRY_DSN", default=None)
-SENTRY_SAMPLE_RATE = decouple.config("SENTRY_SAMPLE_RATE", default=1.0)  # Error sampling rate
-SENTRY_TRANSACTION_SAMPLE_RATE = decouple.config("SENTRY_TRANSACTION_SAMPLE_RATE", default=0.0)  # Transaction sampling
-
-WEBHOOK_ENABLED = decouple.config("WEBHOOK_ENABLED", default=False)
-
-if not RUNNING_DEVSERVER and SENTRY_DSN and EMAIL_INSTANCE:
-    import sentry_sdk
-
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        sample_rate=SENTRY_SAMPLE_RATE,
-        traces_sample_rate=SENTRY_TRANSACTION_SAMPLE_RATE,
-        environment=EMAIL_INSTANCE.lower(),
-        release=APPLICATION_VERSION,
-    )
-
-
 
 SPATIAL_UPDATE_ENDPOINT = decouple.config("SPATIAL_UPDATE_ENDPOINT", default=None)
 SPATIAL_UPDATE_USERNAME = decouple.config("SPATIAL_UPDATE_USERNAME", default=None)
