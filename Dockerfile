@@ -1,6 +1,9 @@
 # Prepare the base environment.
-FROM ubuntu:24.04 as builder_base_spatial_layer_monitor
-MAINTAINER asi@dbca.wa.gov.au
+FROM ubuntu:24.04 AS builder_base_spatial_layer_monitor
+
+LABEL maintainer="asi@dbca.wa.gov.au"
+LABEL org.opencontainers.image.source="https://github.com/dbca-wa/spatial-layer-monitor"
+
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Australia/Perth
 ENV PRODUCTION_EMAIL=True
@@ -15,15 +18,47 @@ RUN mv /etc/apt/sourcesau.list /etc/apt/sources.list
 ENV FIELD_ENCRYPTION_KEY="Mv12YKHFm4WgTXMqvnoUUMZPpxx1ZnlFkfGzwactcdM="
 
 # Key for Build purposes only
-RUN apt-get clean
-RUN apt-get update
-RUN apt-get upgrade -y
-RUN apt-get install --no-install-recommends -y wget git libmagic-dev gcc binutils libproj-dev python3 python3-setuptools python3-dev python3-pip tzdata libreoffice cron python3-gunicorn
-RUN apt-get install --no-install-recommends -y libpq-dev patch virtualenv
-RUN apt-get install --no-install-recommends -y postgresql-client mtr 
-RUN apt-get install --no-install-recommends -y sqlite3 vim postgresql-client ssh htop iputils-ping python3-azure
-RUN apt-get install --no-install-recommends -y gdal-bin python3-gdal
-RUN apt-get install --no-install-recommends -y libgdal-dev build-essential p7zip-full
+RUN apt-get clean && \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install --no-install-recommends -y \
+    binutils \
+    build-essential \
+    cron \
+    gcc \
+    git \
+    htop \
+    iputils-ping \
+    libgdal-dev \
+    libmagic-dev \
+    libpq-dev \
+    libproj-dev \
+    libreoffice \
+    mtr  \
+    p7zip-full \
+    patch \
+    postgresql-client \
+    postgresql-client \
+    python3 \
+    python3-azure \
+    python3-dev \
+    python3-gunicorn \
+    python3-pip \
+    python3-setuptools \
+    software-properties-common \
+    sqlite3 \
+    ssh \
+    tzdata \
+    vim \
+    virtualenv \
+    wget
+
+# Install newer gdal version that is secure
+RUN add-apt-repository ppa:ubuntugis/ubuntugis-unstable && \
+    apt-get update && \
+    apt-get install --no-install-recommends -y \
+    gdal-bin \
+    python3-gdal
 
 RUN ln -s /usr/bin/python3 /usr/bin/python 
 
@@ -46,9 +81,9 @@ COPY startup.sh /
 RUN chmod 755 /startup.sh
 
 # Install Python libs from requirements.txt.
-FROM builder_base_spatial_layer_monitor as python_libs_spatial_layer_monitor
+FROM builder_base_spatial_layer_monitor AS python_libs_spatial_layer_monitor
 WORKDIR /app
-user oim 
+USER oim 
 RUN virtualenv /app/venv
 ENV PATH=/app/venv/bin:$PATH
 RUN git config --global --add safe.directory /app
