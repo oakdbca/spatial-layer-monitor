@@ -8,7 +8,7 @@ pyinotify-elephant-fork==0.0.1
 psycopg2==2.9.10
 
 # Django Application Requirements
-django~=5.0.7
+django~=5.2
 gevent==24.11.1
 django-extensions>=3.2.3
 djangorestframework>=3.14.0
@@ -26,7 +26,7 @@ python-dateutil>=2.8.2
 django-reversion>=5.0.4
 django-reversion-rest-framework>=1.1.2
 # django-cron>=0.6.0
-git+https://github.com/jorenham/django-cron.git#egg=django-cron
+git+https://github.com/dbca-wa/django-cron#egg=django-cron
 py7zr>=0.20.2
 rarfile>=4.0
 httpx>=0.23.2
@@ -42,7 +42,7 @@ wheel==0.42.0
 oauthlib==3.2.2
 requests>=2.32.3
 anyio>=4.4.0
-setuptools==72.0.0
+setuptools==78.1.0
 
 # Field encryption
 django-cryptography-5==2.0.3
